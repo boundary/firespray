@@ -543,10 +543,8 @@ var firesprayChart = function () {
 			}
 
 			if(cache.isMirror){
-//				ctx.moveTo(datum.prevScaledX, cache.chartH - datum.prevScaledY2);
-//				ctx.lineTo(datum.scaledX, cache.chartH - datum.scaledY2);
-				ctx.moveTo(datum.prevScaledX, datum.prevScaledY2 + cache.chartH / 2);
-				ctx.lineTo(datum.scaledX, datum.scaledY2 + cache.chartH / 2);
+				ctx.moveTo(datum.prevScaledX, datum.prevScaledY2);
+				ctx.lineTo(datum.scaledX, datum.scaledY2);
 			}
 			ctx.fill();
 			ctx.stroke();
@@ -573,13 +571,13 @@ var firesprayChart = function () {
 		}
 
 		if (cache.isMirror) {
-			scaleYCopy.range([cache.chartH / 2, cache.chartH]);
+			scaleYCopy.range([cache.chartH, cache.chartH / 2]);
 			for (i = 0; i < data.length; i++) {
 				lineData = data[i];
 				prevDatum = lineData.values[0];
 				for (j = 0; j < lineData.values.length; j++) {
 					datum = lineData.values[j];
-					datum.scaledY2 = cache.chartH - scaleYCopy(datum.y2);
+					datum.scaledY2 = scaleYCopy(datum.y2);
 					datum.prevScaledY2 = prevDatum.scaledY2;
 					prevDatum = datum;
 				}
@@ -631,22 +629,14 @@ var firesprayChart = function () {
 		}
 
 		var stackedMaxValues;
-		if(config.geometryType === 'stackedBar'){
-			stackedMaxValues = d3.zip.apply(null, data.map(function(d, i){
-					return d.values.map(function(d, i){ return d.y; });
-				}))
-				.map(function(d, i){ return d3.sum(d); });
-		}
-		else if(config.geometryType === 'percentBar'){
-			stackedMaxValues = d3.zip.apply(null, data.map(function(d, i){
-					return d.values.map(function(d, i){ return d.y; });
-				}))
-				.map(function(d, i){ return d.length; });
+		var stackedValues = d3.zip.apply(null, data.map(function(d, i){
+				return d.values.map(function(d, i){ return d.y; });
+			}));
+		if(config.geometryType === 'bar'){
+			stackedMaxValues = stackedValues.map(function(d, i){ return d3.max(d); });
 		}
 		else{
-			stackedMaxValues = data.map(function(d, i){
-					return d3.sum(d.values.map(function(d, i){ return d.y; }));
-				});
+			stackedMaxValues = stackedValues.map(function(d, i){ return d3.sum(d); });
 		}
 		var stackedMaxValueSum = d3.max(stackedMaxValues);
 
