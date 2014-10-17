@@ -6,10 +6,22 @@
 	<script src="../lib/d3.js"></script>
 	<script src="../lib/render-queue.js"></script>
 	<script src="../src/firespray-chart.js"></script>
+	<style>
+		.container{
+			float: left;
+			height: 400px;
+			padding: 10px;
+			width: 600px;
+		}
+	</style>
 </head>
 <body>
 
-<div class="container"></div>
+<div class="container chart1"></div>
+<div class="container chart2"></div>
+<div class="container chart3"></div>
+<div class="container chart4"></div>
+<div class="container chart5"></div>
 
 <script>
 
@@ -36,17 +48,57 @@
 			"name": "line B"
 		}];
 
-	var firesprayChart = firesprayChart()
+	var firesprayChart1 = firesprayChart()
 		.setConfig({
-			container: document.querySelector('.container'),
+			container: document.querySelector('.chart1'),
 			width: 600,
 			height: 400,
 			theme: 'default',
-//        	geometryType: 'line',
-//			geometryType: 'stackedBar',
-//			geometryType: 'percentBar',
-//			geometryType: 'bar',
+        	geometryType: 'line',
+			progressiveRenderingRate: 5
+		})
+		.setData(data);
+
+	var firesprayChart2 = firesprayChart()
+		.setConfig({
+			container: document.querySelector('.chart2'),
+			width: 600,
+			height: 400,
+			theme: 'default',
 			geometryType: 'stackedArea',
+			progressiveRenderingRate: 5
+		})
+		.setData(data);
+
+	var firesprayChart3 = firesprayChart()
+		.setConfig({
+			container: document.querySelector('.chart3'),
+			width: 600,
+			height: 400,
+			theme: 'default',
+			geometryType: 'bar',
+			progressiveRenderingRate: 5
+		})
+		.setData([data[0]]);
+
+	var firesprayChart4 = firesprayChart()
+		.setConfig({
+			container: document.querySelector('.chart4'),
+			width: 600,
+			height: 400,
+			theme: 'default',
+			geometryType: 'stackedBar',
+			progressiveRenderingRate: 5
+		})
+		.setData(data);
+
+	var firesprayChart4 = firesprayChart()
+		.setConfig({
+			container: document.querySelector('.chart5'),
+			width: 600,
+			height: 400,
+			theme: 'default',
+			geometryType: 'percentBar',
 			progressiveRenderingRate: 5
 		})
 		.setData(data);
