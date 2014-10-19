@@ -3,7 +3,7 @@ Firespray
 
 Streaming charts library developed by [Boundary](http://boundary.com/)
 
-<div align="center"><img src="img/firespray5.png" /></div>
+<div align="center"><img src="img/firespray_500.png" /></div>
 
 
 ## Bar charts
