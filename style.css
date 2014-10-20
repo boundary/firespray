@@ -19,11 +19,11 @@ div{
 }
 .advanced-example-container{
     display: block;
-    height: 1300px;
+    height: 800px;
 }
 .documentation-container{
 	display: block;
-	height: 1300px;
+	height: 500px;
 }
 body{
     margin: 0;

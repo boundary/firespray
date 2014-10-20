@@ -32,12 +32,11 @@ Streaming charts library developed by [Boundary](http://boundary.com/)
 <br /><br />
 
 ## Live examples 
-#### (More up to date examples in the test folder)
+* [Examples on Plunker](http://plnkr.co/edit/uqBDIJsqGlM2E8zNmy5J?p=preview)
 * [Time slider](http://bl.ocks.org/biovisualize/raw/bdf17be85fc96d629ade/)
 * [Tooltip and info table](http://bl.ocks.org/biovisualize/raw/26c96d4ba4d60c17d64b/)
 
 ## Coming soon...
-* Live examples of the latest version
 * Documentation
 * Unit tests
 
