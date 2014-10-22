@@ -1,18 +1,22 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Mocha</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="stylesheet" href="mocha/mocha.css" />
+	<title>Mocha</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link rel="stylesheet" href="mocha/mocha.css" />
   </head>
   <body>
-    <div id="mocha"></div>
+	<div id="fixture"></div>
+	<div id="mocha"></div>
 	<script src="mocha/chai.js"></script>
 	<script src="mocha/mocha.js"></script>
 	<script>mocha.setup('bdd')</script>
-    <script src="tests.js"></script>
-    <script>
-      mocha.run();
-    </script>
+	<script src="../lib/d3.js"></script>
+	<script src="../lib/render-queue.js"></script>
+	<script src="../src/firespray.js"></script>
+	<script src="tests.js"></script>
+	<script>
+	  mocha.run();
+	</script>
   </body>
 </html>

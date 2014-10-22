@@ -22,12 +22,12 @@
 			'</svg>' +
 			'</div>';
 
-		var defaultStyle = '.boundary-chart .axis-x-bg {fill: rgba(220, 220, 220, 1); }' +
-			'.boundary-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}' +
-			'.boundary-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }' +
-			'.boundary-chart .stripe { fill: rgb(250, 250, 250); }' +
-			'.boundary-chart .panel-bg { fill: white; }' +
-			'.boundary-chart .axis-y line { stroke: #eee; }';
+		var defaultStyle = '.firespray-chart .axis-x-bg {fill: rgba(220, 220, 220, 1); }' +
+			'.firespray-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}' +
+			'.firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }' +
+			'.firespray-chart .stripe { fill: rgb(250, 250, 250); }' +
+			'.firespray-chart .panel-bg { fill: white; }' +
+			'.firespray-chart .axis-y line { stroke: #eee; }';
 
 		// Configuration and cached variables
 		///////////////////////////////////////////////////////////
@@ -67,7 +67,7 @@
 
 			container.html(template);
 
-			cache.root = container.style({position: 'absolute'}).classed('chart boundary-chart', true);
+			cache.root = container.style({position: 'absolute'}).classed('chart firespray-chart', true);
 			cache.bgSvg = cache.root.select('svg.bg');
 			cache.axesSvg = cache.root.select('svg.axes');
 			cache.interactionSvg = cache.root.select('svg.interaction');
