@@ -3,6 +3,8 @@ Firespray
 
 Streaming charts library developed by [Boundary](http://boundary.com/)
 
+[http://biovisualize.github.io/firespray/](http://biovisualize.github.io/firespray/)
+
 <div align="center"><img src="img/firespray_500.png" /></div>
 
 
@@ -32,12 +34,10 @@ Streaming charts library developed by [Boundary](http://boundary.com/)
 <br /><br />
 
 ## Live examples 
-#### (More up to date examples in the test folder)
-* [Time slider](http://bl.ocks.org/biovisualize/raw/bdf17be85fc96d629ade/)
-* [Tooltip and info table](http://bl.ocks.org/biovisualize/raw/26c96d4ba4d60c17d64b/)
+#### (More examples in the test folder)
+* [Live examples on Plunker](http://plnkr.co/edit/uqBDIJsqGlM2E8zNmy5J?p=preview)
 
 ## Coming soon...
-* Live examples of the latest version
 * Documentation
-* Unit tests
+* More usage examples
 
