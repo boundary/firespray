@@ -18,7 +18,9 @@
 			'</g>' +
 			'</svg>' +
 			'<svg xmlns="http://www.w3.org/2000/svg" class="interaction">' +
-			'<g class="hover-group"><line class="hover-guide-x"/></g><g class="brush-group"></g>' +
+			'<g class="hover-group"><line class="hover-guide-x"/>' +
+			'<rect class="hover-rect" width="100%" height="100%" pointer-events="all" fill="none"/></rect>' +
+			'</g><g class="brush-group"></g>' +
 			'</svg>' +
 			'</div>';
 
@@ -83,7 +85,7 @@
 		// Hovering
 		///////////////////////////////////////////////////////////
 		function setupHovering() {
-			cache.interactionSvg
+			cache.interactionSvg.select('.hover-rect')
 				.on('mousemove', function () {
 					if(!hasValidData()) {return;}
 					var mouseX = d3.mouse(cache.geometryCanvas.node())[0];
@@ -101,7 +103,10 @@
 				})
 				.on('mouseenter', function(){ dispatch.chartEnter.call(exports); })
 				.on('mouseout', function () {
-					if(!cache.interactionSvg.node().contains(d3.event.relatedTarget)) {
+					var svg = cache.interactionSvg.node();
+					var target = d3.event.relatedTarget;
+					if((svg.contains && !svg.contains(target)) || 
+						(svg.compareDocumentPosition && !svg.compareDocumentPosition(target))) {
 						cache.interactionSvg.select('.hover-group').style({visibility: 'hidden'});
 						dispatch.chartOut.call(exports);
 					}
@@ -340,7 +345,7 @@
 					var texts = axisContainerY.selectAll('text').attr({transform: 'translate(' + (config.labelYOffset - 2) + ',0)'})
 						.style({'text-anchor': 'start'})
 						.text(function(d){ return parseFloat(d); });
-					texts.filter(function(d, i){ return i === 0; }).text(function(){ return this.innerHTML + ' ' + config.suffix; });
+					texts.filter(function(d, i){ return i === 0; }).text(function(){ return this.textContent + ' ' + config.suffix; });
 					if(config.tickFormatY) {texts.text(config.tickFormatY);}
 					axisContainerY.selectAll('line').remove();
 				}
