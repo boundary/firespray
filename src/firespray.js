@@ -262,19 +262,35 @@
 		}
 
 		function hasValidDataY2(){
-			if(hasValidData() && typeof data[0].values[0].y2 === 'number') {return data[0].values[0];}
+			if(hasValidData() && typeof data[0].values[0].y2 === 'number') {return !!data[0].values[0];}
 			else {return false;}
 		}
 
 		function prepareScales (_extentX, _extentY) {
 			if (_extentX) {
+				//TODO scaleX.range?
 				cache.scaleX.domain(_extentX);
 				cache.extentX = _extentX;
 			}
 			if (_extentY) {
-				var extent = config.axisYStartsAtZero ? [0, _extentY[1]] : _extentY ;
-				cache.scaleY.domain(extent);
-				cache.extentY = extent;
+				if (cache.isMirror) {cache.scaleY.range([cache.chartH / 2, 0]);}
+				else {cache.scaleY.range([cache.chartH, 0]);}
+
+				var scaleYCopy = cache.scaleY.copy();
+				if(config.geometryType === 'stackedLine' || config.geometryType === 'stackedArea'){
+					var stackedMaxValues = d3.zip.apply(null, data.map(function(d, i){
+						return d.values.map(function(d, i){ return d.y; });
+					}))
+						.map(function(d, i){ return d3.sum(d); });
+					var stackedMaxValueSum = d3.max(stackedMaxValues);
+					cache.extentY = [0, stackedMaxValueSum];
+					scaleYCopy.domain(cache.extentY);
+				}
+				else{
+					cache.extentY = config.axisYStartsAtZero ? [0, _extentY[1]] : _extentY ;
+					cache.scaleY.domain(cache.extentY);
+				}
+
 			}
 		}
 
@@ -317,11 +333,11 @@
 			cache.bgSvg.select('.axis-x-bg').attr({width: cache.chartW, height: cache.axisXHeight, y: cache.chartH});
 
 			cache.resolutionConfig = resolutionConfigs[config.resolution];
-			cache.isMirror = (typeof config.isMirror === 'boolean') ? config.isMirror : hasValidDataY2();
-			cache.isMirror = (config.geometryType === 'percentBar' ||
-				config.geometryType === 'stackedBar' ||
-				config.geometryType === 'stackedLine' ||
-				config.geometryType === 'stackedArea')? false : cache.isMirror;
+
+			if(config.geometryType === 'line'){
+				cache.isMirror = (typeof config.isMirror === 'boolean') ? config.isMirror : hasValidDataY2();
+			}
+			else{ cache.isMirror = false; }
 		}
 
 		// Axes
@@ -332,9 +348,19 @@
 			if (cache.isMirror) {cache.scaleY.range([cache.chartH / 2, 0]);}
 			else {cache.scaleY.range([cache.chartH, 0]);}
 
+			var scaleYCopy = cache.scaleY.copy();
+			if(config.geometryType === 'stackedLine' || config.geometryType === 'stackedArea'){
+				var stackedMaxValues = d3.zip.apply(null, data.map(function(d, i){
+					return d.values.map(function(d, i){ return d.y; });
+				}))
+					.map(function(d, i){ return d3.sum(d); });
+				var stackedMaxValueSum = d3.max(stackedMaxValues);
+				scaleYCopy.domain([0, stackedMaxValueSum]);
+			}
+
 			var axisContainerY = cache.axesSvg.select('.axis-y1');
 			var bgYSelection = cache.bgSvg.select('.axis-y1');
-			var axisY = d3.svg.axis().scale(cache.scaleY).orient('left').tickSize(0);
+			var axisY = d3.svg.axis().scale(scaleYCopy).orient('left').tickSize(0);
 
 			function renderAxisPart(axisContainerY, bgYSelection, axisY){
 				var ticksY = [].concat(config.suggestedYTicks); // make sure it's an array
@@ -364,7 +390,8 @@
 			if (cache.isMirror) {
 				var axisContainerY2 = cache.axesSvg.select('.axis-y2');
 				var bgY2Selection = cache.bgSvg.select('.axis-y2');
-				cache.scaleY.range([cache.chartH / 2, cache.chartH]);
+//				cache.scaleY.range([cache.chartH / 2, cache.chartH]);
+				scaleYCopy.range([cache.chartH / 2, cache.chartH]);
 
 				renderAxisPart(axisContainerY2, bgY2Selection, axisY);
 			}
@@ -464,9 +491,9 @@
 
 			// line geometry
 			cache.geometryCanvas.attr({
-				width: cache.chartW,
-				height: cache.chartH
-			})
+					width: cache.chartW,
+					height: cache.chartH
+				})
 				.style({
 					top: config.margin.top + 'px',
 					left: config.margin.left + 'px'
@@ -476,14 +503,14 @@
 //                ctx.translate(0.5, 0.5);
 //                ctx.lineWidth = 1.5;
 
-			if (cache.isMirror) {cache.scaleY.range([cache.chartH / 2, 0]);}
-			else {cache.scaleY.range([0, cache.chartH]);}
+			if (cache.isMirror) {cache.scaleY.range([cache.chartH / 2, 0]);} // TODO use in common with  renderAxisY
+			else {cache.scaleY.range([cache.chartH, 0]);}
 
-			var scaleYCopy = cache.scaleY.copy();
+			var scaleYCopy = cache.scaleY.copy(); //TODO ?
 			if(config.geometryType === 'stackedLine' || config.geometryType === 'stackedArea'){
 				var stackedMaxValues = d3.zip.apply(null, data.map(function(d, i){
-					return d.values.map(function(d, i){ return d.y; });
-				}))
+						return d.values.map(function(d, i){ return d.y; });
+					}))
 					.map(function(d, i){ return d3.sum(d); });
 				var stackedMaxValueSum = d3.max(stackedMaxValues);
 				scaleYCopy.domain([0, stackedMaxValueSum]);
@@ -496,8 +523,9 @@
 				ctx.beginPath();
 				ctx.moveTo(datum.prevScaledX, datum.prevScaledY);
 				ctx.lineTo(datum.scaledX, datum.scaledY);
+
 				if(config.geometryType === 'stackedArea'){
-					ctx.lineTo(datum.scaledX, cache.chartH - datum.stackTopY);
+					ctx.lineTo(datum.scaledX, datum.stackTopY);
 					ctx.lineTo(datum.prevScaledX, datum.prevStackTopY);
 					ctx.lineTo(datum.prevScaledX, datum.prevScaledY);
 				}
@@ -519,13 +547,12 @@
 					prevIndexI = Math.max(i-1, 0);
 					datum.scaledX = cache.scaleX(datum.x);
 					datum.prevScaledX = prevDatum.scaledX;
+					datum.stackTopY = (i === 0 || config.geometryType === 'line') ? scaleYCopy.range()[0] : data[prevIndexI].values[j].scaledY;
+					datum.scaledY = datum.stackTopY + scaleYCopy(datum.y) - scaleYCopy.range()[0];
+					datum.prevStackTopY = prevDatum.stackTopY;
 					datum.prevScaledY = prevDatum.scaledY;
-					datum.prevStackTopY = cache.chartH - prevDatum.stackTopY;
-					datum.stackTopY = (i === 0 || config.geometryType === 'line') ? scaleYCopy.range()[0] : cache.chartH - data[prevIndexI].values[j].scaledY;
-					datum.scaledY = cache.chartH - (datum.stackTopY + scaleYCopy(datum.y));
 					datum.color = lineData.color || 'silver';
 					datum.name = lineData.name;
-					datum.talkerName = lineData.talkerName;
 					prevDatum = {scaledX: datum.scaledX, scaledY: datum.scaledY, stackTopY: datum.stackTopY};
 				}
 			}
@@ -537,7 +564,7 @@
 					prevDatum = lineData.values[0];
 					for (j = 0; j < lineData.values.length; j++) {
 						datum = lineData.values[j];
-						datum.scaledY2 = scaleYCopy(datum.y2);
+						datum.scaledY2 = cache.chartH + cache.chartH / 2 - scaleYCopy(datum.y2);
 						datum.prevScaledY2 = prevDatum.scaledY2;
 						prevDatum = datum;
 					}
@@ -615,15 +642,17 @@
 					datum.topY = (datum.prevTopY + datum.scaledY);
 					datum.color = lineData.color || 'silver';
 					datum.name = lineData.name;
-					datum.talkerName = lineData.talkerName;
 					datum.barW = barW;
 				}
 			}
 
-			for (i = 0; i < data.length * 2; i++){
-				queues.push(renderQueue(renderBar).rate(config.progressiveRenderingRate));
+			if(config.useProgressiveRendering && typeof renderQueue !== 'undefined'){ //TODO share with renderLineGeometry
+				for (i = 0; i < data.length * 2; i++){
+					queues.push(renderQueue(renderBar).rate(config.progressiveRenderingRate));
+				}
+				data.forEach(function(d, i){ queues[i](d.values); });
 			}
-			data.forEach(function(d, i){ queues[i](d.values); });
+			else {data.forEach(function(d, i){ d.values.forEach(function(d){ renderBar(d); }); });}
 		}
 
 		// Brush
@@ -676,7 +705,7 @@
 			var extentX = computeExtent(data, 'x');
 			var extentY = computeExtent(data, 'y');
 
-			if(cache.isMirror && hasValidDataY2()) {
+			if(cache.isMirror != false && hasValidDataY2()) {
 				var extentY2 = computeExtent(data, 'y2');
 				extentY = [Math.min(extentY[0], extentY2[0]), Math.max(extentY[1], extentY2[1])];
 			}
@@ -759,7 +788,7 @@
 
 		exports.getDataExtent = function () {
 			if(cache.extentX && cache.extentX) {
-				return {x: cache.extentX, y:cache.extentY};
+				return {x: cache.extentX.map(function(d){ return d.getTime(); }), y:cache.extentY};
 			}
 		};
 
@@ -850,25 +879,33 @@
 			}
 			return destination;
 		},
-		generateData: function(pointCount, lineCount){
-			var currentDate = new Date();
-			var pointCount = pointCount || 1000;
-			var lineCount = lineCount || 5;
-			var colors = d3.scale.category20().range();
-			var data = d3.range(lineCount).map(function(d, i){
-				return {
-					values: d3.range(pointCount).map(function(dB, iB){
-						return {
-							x: currentDate.getTime() + 1000 * iB,
-							y: Math.random()*100,
-							y2: Math.random()*100
-						};
-					}),
-					"color": colors[i],
-					"name": "line i"
+		generateDataPoint: function(options, i){
+			var point = {
+					x: options.epoch,
+					y: Math.random()*100
 				};
+			if(options.valueCount > 1) {point.y2 = Math.random()*100;}
+			return point;
+		},
+		generateDataLine: function(options, i){
+			var pointCount = options.pointCount || 1000;
+			var colors = d3.scale.category20().range();
+			options.epoch = options.startEpoch;
+			return {
+				values: d3.range(pointCount).map(function(dB, iB){
+					options.epoch += 1000;
+					return firespray.utils.generateDataPoint(options);
+				}),
+				"color": colors[i],
+				"name": "line i"
+			};
+		},
+		generateData: function(options){
+			options.startEpoch = new Date().getTime();
+			var lineCount = options.lineCount || 5;
+			return d3.range(lineCount).map(function(d, i){
+				return firespray.utils.generateDataLine(options, i)
 			});
-			return data;
 		}
 	};
 

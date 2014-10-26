@@ -37,7 +37,7 @@
 <script>
 
 	var container1 = document.querySelector('.chart1');
-	var data = firespray.utils.generateData(100, 5);
+	var data = firespray.utils.generateData({pointCount: 100, lineCount: 5});
 	var timeSelectorChart = firespray()
 		.setConfig({
 			container: container1,
@@ -61,7 +61,7 @@
 			width: container2.clientWidth,
 			height: container2.clientHeight,
 			theme: 'default',
-			geometryType: 'line'
+			geometryType: 'stackedArea'
 		})
 		.setData(data);
 
@@ -72,7 +72,7 @@
 			width: container3.clientWidth,
 			height: container3.clientHeight,
 			theme: 'default',
-			geometryType: 'line'
+			geometryType: 'stackedBar'
 		})
 		.setData(data);
 

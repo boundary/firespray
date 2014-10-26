@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<script src="../lib/d3.js"></script>
+	<script src="../src/firespray.js"></script>
+	<style>
+		.container{
+			float: left;
+			height: 250px;
+			padding: 10px;
+			width: 600px;
+			font-size: 12px;
+		}
+	</style>
+</head>
+<body>
+
+<div class="container chart1"></div>
+<div class="container chart2"></div>
+<div class="container chart3"></div>
+
+<script>
+
+	var simpleData = [
+		{
+			name: 'a',
+			color: 'skyblue',
+			values: [
+				{x: 1414291072000, y: 10},
+				{x: 1414291073000, y: 1},
+				{x: 1414291074000, y: 5}
+			]
+		}
+	];
+
+	var stackedData = [
+		{
+			name: 'a',
+			color: 'skyblue',
+			values: [
+				{x: 1414291072000, y: 10},
+				{x: 1414291073000, y: 1},
+				{x: 1414291074000, y: 5}
+			]
+		},
+		{
+			name: 'b',
+			color: 'orange',
+			values: [
+				{x: 1414291072000, y: 5},
+				{x: 1414291073000, y: 1},
+				{x: 1414291074000, y: 15}
+			]
+		}
+	];
+
+	var mirrorData = [
+		{
+			name: 'a',
+			color: 'skyblue',
+			values: [
+				{x: 1414291072000, y: 10, y2: 15},
+				{x: 1414291073000, y: 1, y2: 1},
+				{x: 1414291074000, y: 5, y2: 2}
+			]
+		}
+	];
+
+	var stackedhart = firespray()
+		.setConfig({
+			container: document.querySelector('.chart1'),
+			width: 400,
+			height: 250,
+			theme: 'default',
+			geometryType: 'line'
+//        	geometryType: 'bar'
+		})
+		.setData(simpleData);
+
+	var stackedhart = firespray()
+		.setConfig({
+			container: document.querySelector('.chart2'),
+			width: 400,
+			height: 250,
+			theme: 'default',
+        	geometryType: 'stackedArea'
+//        	geometryType: 'stackedBar'
+//        	geometryType: 'percentBar'
+		})
+		.setData(stackedData);
+
+	var mirrorChart = firespray()
+		.setConfig({
+			container: document.querySelector('.chart3'),
+			width: 400,
+			height: 250,
+			theme: 'default',
+			geometryType: 'line'
+		})
+		.setData(mirrorData);
+
+</script>
+</body>
+</html>
