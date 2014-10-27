@@ -24,12 +24,22 @@
 			'</svg>' +
 			'</div>';
 
-		var defaultStyle = '.firespray-chart .axis-x-bg {fill: rgba(220, 220, 220, 1); }' +
+		var themes = {
+			default: '.firespray-chart .axis-x-bg {fill: rgba(220, 220, 220, 1); }' +
 			'.firespray-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}' +
 			'.firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }' +
 			'.firespray-chart .stripe { fill: rgb(250, 250, 250); }' +
 			'.firespray-chart .panel-bg { fill: white; }' +
-			'.firespray-chart .axis-y line { stroke: #eee; }';
+			'.firespray-chart .axis-y line { stroke: #eee; }',
+
+			dark: '.firespray-chart .axis-x-bg {fill: #222; }' +
+			'.firespray-chart .axis-y-bg {fill: rgba(50, 50, 50, 0.5);}' +
+			'.firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }' +
+			'.firespray-chart .stripe { fill: #222; }' +
+			'.firespray-chart .panel-bg { fill: #333; }' +
+			'.firespray-chart .axis-y line { stroke: #111; }' +
+			'text { font-size: 10px; fill: #aaa; }'
+		};
 
 		// Configuration and cached variables
 		///////////////////////////////////////////////////////////
@@ -46,7 +56,10 @@
 			axisXHeight: null,
 			brushExtent: null,
 			extentX: null,
-			extentY: null
+			extentY: null,
+			zoomedExtentX: null,
+			theme: null,
+			brush: null
 		};
 		var resolutionConfigs = {
 			second: { dividerMillis: 1000, dateFunc: 'setSeconds', d3DateFunc: d3.time.second},
@@ -55,36 +68,14 @@
 		};
 
 		var data = [], queues = [];
-		var brush = d3.svg.brush();
-		var dispatch = d3.dispatch('brushChange', 'brushDragStart', 'brushDragMove', 'brushDragEnd', 'dotHover', 'dotMouseOut', 'dotClick', 'chartHover', 'chartOut', 'chartEnter');
+		var dispatch = d3.dispatch('brushChange', 'brushDragStart', 'brushDragMove', 'brushDragEnd', 'geometryHover', 'geometryOut', 'geometryClick', 'chartHover', 'chartOut', 'chartEnter');
 		var exports = {};
-
-		// Initialization
-		///////////////////////////////////////////////////////////
-		function init() {
-
-			// Template
-			if(!config.container) {return this;}
-			var container = d3.select(config.container).append('div');
-
-			container.html(template);
-
-			cache.root = container.style({position: 'absolute'}).classed('chart firespray-chart', true);
-			cache.bgSvg = cache.root.select('svg.bg');
-			cache.axesSvg = cache.root.select('svg.axes');
-			cache.interactionSvg = cache.root.select('svg.interaction');
-			cache.geometryCanvas = cache.root.select('canvas.geometry');
-			cache.root.selectAll('svg, canvas').style({position: 'absolute'});
-
-			// Hovering
-			if(!config.useBrush) {setupHovering();}
-
-			return this;
-		}
 
 		// Hovering
 		///////////////////////////////////////////////////////////
 		function setupHovering() {
+			if(config.useBrush) {return this;}
+
 			cache.interactionSvg.select('.hover-rect')
 				.on('mousemove', function () {
 					if(!hasValidData()) {return;}
@@ -167,10 +158,10 @@
 						valueY: valueY,
 						containerTop: containerTop
 					};
-					dispatch.dotHover.call(exports, e, d);
+					dispatch.geometryHover.call(exports, e, d);
 				})
-				.on('mouseout', function(){ dispatch.dotMouseOut.call(exports); })
-				.on('click', function(){ dispatch.dotClick.call(exports); });
+				.on('mouseout', function(){ dispatch.geometryOut.call(exports); })
+				.on('click', function(){ dispatch.geometryClick.call(exports); });
 			hoveredDotsSelection
 				.filter(function(d, i){ return typeof d !== 'undefined' && !isNaN(d.y); })
 				.style({
@@ -215,10 +206,10 @@
 						valueY: valueY,
 						containerTop: containerTop
 					};
-					dispatch.call(exports, e, d);
+					dispatch.geometryHover.call(exports, e, d);
 				})
-				.on('mouseout', function(){ dispatch.dotMouseOut.call(exports); })
-				.on('click', function(){ dispatch.dotClick.call(exports); });
+				.on('mouseout', function(){ dispatch.geometryOut.call(exports); })
+				.on('click', function(){ dispatch.geometryClick.call(exports); });
 			hoveredDotsSelection
 				.filter(function(d, i){ return typeof d !== 'undefined' && !isNaN(d.y); })
 				.style({
@@ -247,6 +238,19 @@
 			return this;
 		}
 
+		function showHovering(hoverPosX){
+			var closestPointsScaledX = injectClosestPointsFromX(hoverPosX);
+			cache.interactionSvg.select('.hover-group').style({visibility: 'visible'});
+			if (typeof closestPointsScaledX !== 'undefined') {
+				displayHoveredGeometry();
+				displayVerticalGuide(closestPointsScaledX);
+			}
+			else {
+				hideHoveredGeometry();
+				displayVerticalGuide(hoverPosX);
+			}
+		}
+
 		// Convenience functions
 		///////////////////////////////////////////////////////////
 		function getFirstDataValue(){
@@ -266,54 +270,49 @@
 			else {return false;}
 		}
 
-		function prepareScales (_extentX, _extentY) {
-			if (_extentX) {
-				//TODO scaleX.range?
-				cache.scaleX.domain(_extentX);
-				cache.extentX = _extentX;
-			}
-			if (_extentY) {
-				if (cache.isMirror) {cache.scaleY.range([cache.chartH / 2, 0]);}
-				else {cache.scaleY.range([cache.chartH, 0]);}
-
-				var scaleYCopy = cache.scaleY.copy();
-				if(config.geometryType === 'stackedLine' || config.geometryType === 'stackedArea'){
-					var stackedMaxValues = d3.zip.apply(null, data.map(function(d, i){
-						return d.values.map(function(d, i){ return d.y; });
-					}))
-						.map(function(d, i){ return d3.sum(d); });
-					var stackedMaxValueSum = d3.max(stackedMaxValues);
-					cache.extentY = [0, stackedMaxValueSum];
-					scaleYCopy.domain(cache.extentY);
-				}
-				else{
-					cache.extentY = config.axisYStartsAtZero ? [0, _extentY[1]] : _extentY ;
-					cache.scaleY.domain(cache.extentY);
-				}
-
-			}
+		function computeExtent(_data, _axis) {
+			return d3.extent(d3.merge(_data.map(function(d){ return d.values.map(function(dB){ return dB[_axis]; }); })));
 		}
 
 		// Rendering
 		///////////////////////////////////////////////////////////
 		function render() {
-			if (!cache.geometryCanvas && config.container) {init();}
-			prepareContainers();
-			if(config.showAxisY) {renderAxisY();}
-			if(config.showAxisX) {renderAxisX();}
-			if(config.useBrush) {setupBrush();}
+			setupContainers();
+			setupScales();
+			setupAxisY();
+			setupAxisX();
+			setupBrush();
+			setupHovering();
+			setupStripes();
+			setupGeometries();
+		}
+
+		function setupGeometries(){
 			if(!hasValidData()) {return;}
-			if(config.showStripes) {showStripes();}
+
 			if(config.geometryType === 'line' ||
 				config.geometryType === 'stackedLine' ||
 				config.geometryType === 'stackedArea') {renderLineGeometry();}
 			else if(config.geometryType === 'bar' ||
 				config.geometryType === 'percentBar' ||
 				config.geometryType === 'stackedBar') {renderBarGeometry();}
-			if(config.theme) {applyStyle();}
 		}
 
-		function prepareContainers(){
+		function setupContainers(){
+
+			// Template
+			if(!cache.root && config.container){
+				var container = d3.select(config.container).append('div');
+
+				container.html(template);
+
+				cache.root = container.style({position: 'absolute'}).classed('chart firespray-chart', true);
+				cache.bgSvg = cache.root.select('svg.bg');
+				cache.axesSvg = cache.root.select('svg.axes');
+				cache.interactionSvg = cache.root.select('svg.interaction');
+				cache.geometryCanvas = cache.root.select('canvas.geometry');
+				cache.root.selectAll('svg, canvas').style({position: 'absolute'});
+			}
 
 			// calculate sizes
 			cache.axisXHeight = (!config.showAxisX || !config.showLabelsX) ? 0 : config.axisXHeight;
@@ -338,11 +337,64 @@
 				cache.isMirror = (typeof config.isMirror === 'boolean') ? config.isMirror : hasValidDataY2();
 			}
 			else{ cache.isMirror = false; }
+
+			if(config.theme !== cache.theme){
+				cache.root.select('style').remove();
+				cache.root.append('style').html(themes[config.theme]);
+				cache.theme = config.theme;
+			}
+		}
+
+		// Scales
+		///////////////////////////////////////////////////////////
+		function setupScales(){
+			if(!hasValidData()) {return;}
+
+			setupScaleX();
+			setupScaleY();
+		}
+
+		function setupScaleX(){
+			var extentX = config.zoomedExtentX || computeExtent(data, 'x');
+			//TODO scaleX.range?
+			cache.scaleX.domain(extentX);
+			cache.extentX = extentX;
+		}
+
+		function setupScaleY(){
+			var extentY = computeExtent(data, 'y');
+
+			if(cache.isMirror != false && hasValidDataY2()) {
+				var extentY2 = computeExtent(data, 'y2');
+				extentY = [Math.min(extentY[0], extentY2[0]), Math.max(extentY[1], extentY2[1])];
+			}
+
+			if (cache.isMirror) {cache.scaleY.range([cache.chartH / 2, 0]);}
+			else {cache.scaleY.range([cache.chartH, 0]);}
+
+			var scaleYCopy = cache.scaleY.copy();
+			if(config.geometryType === 'stackedLine' || config.geometryType === 'stackedArea'){
+				var stackedMaxValues = d3.zip.apply(null, data.map(function(d, i){
+					return d.values.map(function(d, i){ return d.y; });
+				}))
+					.map(function(d, i){ return d3.sum(d); });
+				var stackedMaxValueSum = d3.max(stackedMaxValues);
+				cache.extentY = [0, stackedMaxValueSum];
+				scaleYCopy.domain(cache.extentY);
+			}
+			else{
+				cache.extentY = config.axisYStartsAtZero ? [0, extentY[1]] : extentY ;
+				cache.scaleY.domain(cache.extentY);
+			}
+
 		}
 
 		// Axes
 		///////////////////////////////////////////////////////////
-		function renderAxisY(){
+		function setupAxisY(){
+			if(!hasValidData()) {return;}
+
+			if(!config.showAxisY) {return this;}
 
 			// Y axis
 			if (cache.isMirror) {cache.scaleY.range([cache.chartH / 2, 0]);}
@@ -418,7 +470,10 @@
 
 		}
 
-		function renderAxisX(){
+		function setupAxisX(){
+			if(!hasValidData()) {return;}
+
+			if(!config.showAxisX) {return this;}
 
 			// X axis
 			/////////////////////////////
@@ -462,7 +517,9 @@
 			cache.axesSvg.select('.domain').style({fill: 'none', stroke: 'none'});
 		}
 
-		function showStripes(){
+		function setupStripes(){
+
+			if(!config.showStripes) {return this;}
 
 			// stripes
 			if(hasValidData() && cache.resolutionConfig){
@@ -503,7 +560,7 @@
 //                ctx.translate(0.5, 0.5);
 //                ctx.lineWidth = 1.5;
 
-			if (cache.isMirror) {cache.scaleY.range([cache.chartH / 2, 0]);} // TODO use in common with  renderAxisY
+			if (cache.isMirror) {cache.scaleY.range([cache.chartH / 2, 0]);} // TODO use in common with  setupAxisY
 			else {cache.scaleY.range([cache.chartH, 0]);}
 
 			var scaleYCopy = cache.scaleY.copy(); //TODO ?
@@ -658,31 +715,28 @@
 		// Brush
 		///////////////////////////////////////////////////////////
 		function setupBrush(){
+			if(!config.useBrush || cache.brush) {return this;}
+
+			cache.brush = d3.svg.brush();
+
 			var brushChange = firespray.utils.throttle(dispatch.brushChange, config.brushThrottleWaitDuration);
 			var brushDragMove = firespray.utils.throttle(dispatch.brushDragMove, config.brushThrottleWaitDuration);
-			if (config.useBrush) {
-				cache.brushExtent = cache.brushExtent || cache.scaleX.domain();
-				brush.x(cache.scaleX)
-					.extent(cache.brushExtent)
-					.on("brush", function () {
-						brushChange.call(exports, cache.brushExtent);
-						if (!d3.event.sourceEvent) {return;} // only on manual brush resize
-						cache.brushExtent = brush.extent();
-						brushDragMove.call(exports, cache.brushExtent);
-					})
-					.on("brushstart", function(){ dispatch.brushDragStart.call(exports, cache.brushExtent); })
-					.on("brushend", function(){ dispatch.brushDragEnd.call(exports, cache.brushExtent); });
-				cache.interactionSvg.select('.brush-group')
-					.call(brush)
-					.selectAll('rect')
-					.attr({height: cache.chartH + cache.axisXHeight, y: 0});
-			}
-		}
 
-		function applyStyle(){
-			if(config.theme === 'default'){
-				cache.root.append('style').html(defaultStyle);
-			}
+			cache.brushExtent = cache.brushExtent || cache.scaleX.domain();
+			cache.brush.x(cache.scaleX)
+				.extent(cache.brushExtent)
+				.on("brush", function () {
+					brushChange.call(exports, cache.brushExtent.map(function(d){ return d.getTime(); }));
+					if (!d3.event.sourceEvent) {return;} // only on manual brush resize
+					cache.brushExtent = cache.brush.extent();
+					brushDragMove.call(exports, cache.brushExtent.map(function(d){ return d.getTime(); }));
+				})
+				.on("brushstart", function(){ dispatch.brushDragStart.call(exports, cache.brushExtent.map(function(d){ return d.getTime(); })); })
+				.on("brushend", function(){ dispatch.brushDragEnd.call(exports, cache.brushExtent.map(function(d){ return d.getTime(); })); });
+			cache.interactionSvg.select('.brush-group')
+				.call(cache.brush)
+				.selectAll('rect')
+				.attr({height: cache.chartH + cache.axisXHeight, y: 0});
 		}
 
 		// Public methods
@@ -696,28 +750,14 @@
 				var x = a.values.length; var y = b.values.length;
 				return ((x > y) ? -1 : ((x < y) ? 1 : 0));
 			});
-			if(_newData.metadata) {data.metadata = _newData.metadata;}
+			if(_newData.metadata) {data.metadata = _newData.metadata;} //TODO needed?
 
-			function computeExtent(_data, _axis) {
-				return d3.extent(d3.merge(_data.map(function(d){ return d.values.map(function(dB){ return dB[_axis]; }); })));
-			}
-
-			var extentX = computeExtent(data, 'x');
-			var extentY = computeExtent(data, 'y');
-
-			if(cache.isMirror != false && hasValidDataY2()) {
-				var extentY2 = computeExtent(data, 'y2');
-				extentY = [Math.min(extentY[0], extentY2[0]), Math.max(extentY[1], extentY2[1])];
-			}
-
-			prepareScales(extentX, extentY);
 			render();
 			return this;
 		};
 
 		exports.setConfig = function (_newConfig) {
 			firespray.utils.override(_newConfig, config);
-			if(_newConfig.container) {init();}
 			return this;
 		};
 
@@ -730,11 +770,11 @@
 			var dataSlice = firespray.utils.cloneJSON(data)
 				.map(function(d){
 					d.values = d.values.map(function(dB){
-						dB.x = new Date(dB.x);
-						return dB;
-					})
+							dB.x = new Date(dB.x);
+							return dB;
+						})
 						.filter(function(dB){
-							return dB.x.getTime() >= _sliceExtentX[0].getTime() && dB.x.getTime() <= _sliceExtentX[1].getTime();
+							return dB.x.getTime() >= _sliceExtentX[0] && dB.x.getTime() <= _sliceExtentX[1];
 						});
 					return d;
 				});
@@ -746,13 +786,13 @@
 		};
 
 		exports.setZoom = function (_newExtent) {
-			prepareScales(_newExtent.map(function (d) { return new Date(d); }));
+			config.zoomedExtentX = _newExtent.map(function (d) { return new Date(d); });
 			render();
 			return this;
 		};
 
 		exports.setBrushSelection = function (_brushSelectionExtent) {
-			if (brush) {
+			if (cache.brush) {
 				cache.brushExtent = _brushSelectionExtent.map(function (d) { return new Date(d); });
 				render();
 			}
@@ -765,25 +805,12 @@
 			showHovering(hoverPosX);
 		};
 
-		function showHovering(hoverPosX){
-			var closestPointsScaledX = injectClosestPointsFromX(hoverPosX);
-			cache.interactionSvg.select('.hover-group').style({visibility: 'visible'});
-			if (typeof closestPointsScaledX !== 'undefined') {
-				displayHoveredGeometry();
-				displayVerticalGuide(closestPointsScaledX);
-			}
-			else {
-				hideHoveredGeometry();
-				displayVerticalGuide(hoverPosX);
-			}
-		}
-
 		exports.brushIsFarRight = function () {
-			if(brush.extent()) {return brush.extent()[1].getTime() === cache.scaleX.domain()[1].getTime();}
+			if(cache.brush.extent()) {return cache.brush.extent()[1].getTime() === cache.scaleX.domain()[1].getTime();}
 		};
 
 		exports.getBrushExtent = function () {
-			if(brush.extent()) {return brush.extent();}
+			if(cache.brush.extent()) {return cache.brush.extent().map(function(d){ return d.getTime(); });}
 		};
 
 		exports.getDataExtent = function () {
@@ -820,6 +847,8 @@
 		return exports;
 	};
 
+	// Static default config
+	///////////////////////////////////////////////////////////
 	firespray.defaultConfig = {
 		width: 500,
 		height: 300,
