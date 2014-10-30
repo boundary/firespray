@@ -28,9 +28,11 @@
 			default: '.firespray-chart .axis-x-bg {fill: rgba(220, 220, 220, 1); }' +
 			'.firespray-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}' +
 			'.firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }' +
-			'.firespray-chart .stripe { fill: rgb(250, 250, 250); }' +
+			'.firespray-chart .stripe { fill: none; }' +
+			'.firespray-chart .stripe.even { fill: rgb(250, 250, 250); }' +
 			'.firespray-chart .panel-bg { fill: white; }' +
-			'.firespray-chart .axis-y line { stroke: #eee; }',
+			'.firespray-chart .axis-y line { stroke: #eee; }' +
+			'text { font-size: 10px; fill: #aaa; }',
 
 			dark: '.firespray-chart .axis-x-bg {fill: #222; }' +
 			'.firespray-chart .axis-y-bg {fill: rgba(50, 50, 50, 0.5);}' +
@@ -49,7 +51,6 @@
 			bgSvg: null,
 			axesSvg: null,
 			geometryCanvas: null,
-			resolutionConfigs: null,
 			scaleX: d3.time.scale(),
 			scaleY: d3.scale.linear(),
 			isMirror: null,
@@ -60,11 +61,6 @@
 			zoomedExtentX: null,
 			theme: null,
 			brush: null
-		};
-		var resolutionConfigs = {
-			second: { dividerMillis: 1000, dateFunc: 'setSeconds', d3DateFunc: d3.time.second},
-			minute: { dividerMillis: 60*1000, dateFunc: 'setMinutes', d3DateFunc: d3.time.minute},
-			hour: { dividerMillis: 60*60*1000, dateFunc: 'setHours', d3DateFunc: d3.time.hour}
 		};
 
 		var data = [], queues = [];
@@ -331,8 +327,6 @@
 			cache.bgSvg.select('.panel-bg').attr({width: cache.chartW, height: cache.chartH});
 			cache.bgSvg.select('.axis-x-bg').attr({width: cache.chartW, height: cache.axisXHeight, y: cache.chartH});
 
-			cache.resolutionConfig = resolutionConfigs[config.resolution];
-
 			if(config.geometryType === 'line'){
 				cache.isMirror = (typeof config.isMirror === 'boolean') ? config.isMirror : hasValidDataY2();
 			}
@@ -487,13 +481,6 @@
 					axisX.tickFormat(function (d) { return config.timeFormat(d); });
 				}
 
-				if (config.resolution && config.suggestedXTicks){
-					// if below suggested time interval, reduce to 1 interval
-					var extentSecondsInterval = (cache.extentX[1].getTime() - cache.extentX[0].getTime()) / cache.resolutionConfig.dividerMillis;
-					var suggestedTicks = (extentSecondsInterval <= config.suggestedXTicks) ? Math.floor(extentSecondsInterval) : config.suggestedXTicks;
-					axisX.ticks(suggestedTicks);
-				}
-
 				axisXSelection.call(axisX);
 				var textH = 12;
 				var textOffset = cache.axisXHeight/2 + textH/2;
@@ -519,27 +506,25 @@
 
 		function setupStripes(){
 
-			if(!config.showStripes) {return this;}
+			if(!config.showStripes || !hasValidData()) {return this;}
 
 			// stripes
-			if(hasValidData() && cache.resolutionConfig){
-				var extentXMinusOneStripe = cache.resolutionConfig.d3DateFunc.offset(cache.extentX[0], -config.stripeWidthInSample*2);
-				var discretizedDates = cache.resolutionConfig.d3DateFunc.range(extentXMinusOneStripe, cache.extentX[1], config.stripeWidthInSample*2);
-				var tickSpacing = cache.scaleX(cache.resolutionConfig.d3DateFunc.offset(getFirstDataValue().x, config.stripeWidthInSample)) - cache.scaleX(getFirstDataValue().x);
+			var stripeW = cache.scaleX(data[0].values[1].x) * config.stripeWidthInSample;
+			var stripCount = Math.ceil(cache.chartW / stripeW);
 
-				var stripesSelection = cache.bgSvg.select('.background').selectAll('rect.stripe')
-					.data(discretizedDates);
-				stripesSelection.enter().append('rect').attr({'class': 'stripe'});
-				stripesSelection
-					.attr({
-						x: function(d){ return cache.scaleX(d); },
-						y: 0,
-						width: isNaN(tickSpacing)? 0 : tickSpacing,
-						height: cache.chartH
-					})
-					.style({stroke: 'none'});
-				stripesSelection.exit().remove();
-			}
+			var stripesSelection = cache.bgSvg.select('.background').selectAll('rect.stripe')
+				.data(d3.range(stripCount));
+			stripesSelection.enter().append('rect').attr({'class': 'stripe'});
+			stripesSelection
+				.attr({
+					x: function(d, i){ return i * stripeW; },
+					y: 0,
+					width: stripeW,
+					height: cache.chartH
+				})
+				.classed('even', function(d, i){ return i%2 === 0; })
+				.style({stroke: 'none'});
+			stripesSelection.exit().remove();
 		}
 
 		// Geometry
@@ -657,7 +642,7 @@
 			var i, j, lineData, datum, prevIndex;
 
 			// bar width
-			var barW = cache.scaleX(cache.resolutionConfig.d3DateFunc.offset(cache.extentX[0], 1));
+			var barW = cache.scaleX(data[0].values[1].x);
 			var barGap = Math.max(barW/4, 1);
 			barW = Math.floor(barW - barGap);
 			barW = Math.max(1, barW);
@@ -864,8 +849,7 @@
 		isMirror: null,
 		dotSize: 4,
 		suffix: '',
-		resolution: 'second',
-		stripeWidthInSample: 2,
+		stripeWidthInSample: 1,
 		tickFormatY: null,
 		labelYOffset: 10,
 		axisYStartsAtZero: true,
@@ -933,7 +917,7 @@
 			options.startEpoch = new Date().getTime();
 			var lineCount = options.lineCount || 5;
 			return d3.range(lineCount).map(function(d, i){
-				return firespray.utils.generateDataLine(options, i)
+				return firespray.utils.generateDataLine(options, i);
 			});
 		}
 	};
