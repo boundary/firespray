@@ -5,7 +5,7 @@
 	<title>Chart demo</title>
 	<script src="../lib/d3.js"></script>
 	<script src="../lib/render-queue.js"></script>
-	<script src="../src/firespray.js"></script>
+	<script src="../firespray.js"></script>
 	<style>
 		.container{
 			float: left;
@@ -38,7 +38,7 @@
 
 	var container1 = document.querySelector('.chart1');
 	var data = firespray.utils.generateData({pointCount: 100, lineCount: 5});
-	var timeSelectorChart = firespray()
+	var timeSelectorChart = firespray.chart()
 		.setConfig({
 			container: container1,
 			width: container1.clientWidth,
@@ -50,12 +50,12 @@
 		})
 		.on('brushChange', function(brushExtent){
 			chart1.setZoom(brushExtent);
-			chart2.setData(this.getDataUnderBrush());
+			chart2.setData(timeSelectorChart.getDataUnderBrush());
 		})
 		.setData(data);
 
 	var container2 = document.querySelector('.chart2');
-	var chart1 = firespray()
+	var chart1 = firespray.chart()
 		.setConfig({
 			container: container2,
 			width: container2.clientWidth,
@@ -66,7 +66,7 @@
 		.setData(data);
 
 	var container3 = document.querySelector('.chart3');
-	var chart2 = firespray()
+	var chart2 = firespray.chart()
 		.setConfig({
 			container: container3,
 			width: container3.clientWidth,

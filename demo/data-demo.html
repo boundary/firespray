@@ -3,7 +3,7 @@
 <head lang="en">
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<script src="../lib/d3.js"></script>
-	<script src="../src/firespray.js"></script>
+	<script src="../firespray.js"></script>
 	<style>
 		.container{
 			float: left;
@@ -19,6 +19,9 @@
 <div class="container chart1"></div>
 <div class="container chart2"></div>
 <div class="container chart3"></div>
+<div class="container chart4"></div>
+<div class="container chart5"></div>
+<div class="container chart6"></div>
 
 <script>
 
@@ -67,7 +70,58 @@
 		}
 	];
 
-	var stackedhart = firespray()
+	var data10Sec = [
+		{
+			name: 'a',
+			color: 'skyblue',
+			values: [
+				{x: 1414291070000, y: 10},
+				{x: 1414291080000, y: 1},
+				{x: 1414291090000, y: 5},
+				{x: 1414291100000, y: 1},
+				{x: 1414291110000, y: 1}
+			]
+		}
+	];
+
+	var dataUnequal = [
+		{
+			name: 'a',
+			color: 'skyblue',
+			values: [
+				{x: 1414291071000, y: 10},
+				{x: 1414291072000, y: 1},
+				{x: 1414291074000, y: 5},
+				{x: 1414291078000, y: 1},
+				{x: 1414291079000, y: 1}
+			]
+		}
+	];
+
+	var dayInMillis = +24*60*60*1000;
+	var dataDays = [
+		{
+			name: 'a',
+			color: 'skyblue',
+			values: [
+				{x: 1414291071000, y: 10},
+				{x: 1414291071000 + dayInMillis, y: 1},
+				{x: 1414291071000 + dayInMillis*2, y: 1},
+				{x: 1414291071000 + dayInMillis*3, y: 1},
+				{x: 1414291071000 + dayInMillis*4, y: 1}
+			]
+		}
+	];
+
+	var dataLong = [
+		{
+			name: 'a',
+			color: 'skyblue',
+			values: d3.range(100).map(function(d, i){ return {x: 1414291071000 + 1000*i, y: 10 * (i%2) + 10}; })
+		}
+	];
+
+	var chart1 = firespray.chart()
 		.setConfig({
 			container: document.querySelector('.chart1'),
 			width: 400,
@@ -78,7 +132,7 @@
 		})
 		.setData(simpleData);
 
-	var stackedhart = firespray()
+	var chart2 = firespray.chart()
 		.setConfig({
 			container: document.querySelector('.chart2'),
 			width: 400,
@@ -90,7 +144,7 @@
 		})
 		.setData(stackedData);
 
-	var mirrorChart = firespray()
+	var chart3 = firespray.chart()
 		.setConfig({
 			container: document.querySelector('.chart3'),
 			width: 400,
@@ -99,6 +153,36 @@
 			geometryType: 'line'
 		})
 		.setData(mirrorData);
+
+	var chart4 = firespray.chart()
+		.setConfig({
+			container: document.querySelector('.chart4'),
+			width: 400,
+			height: 250,
+			theme: 'default',
+			geometryType: 'line'
+		})
+		.setData(data10Sec);
+
+	var chart5 = firespray.chart()
+		.setConfig({
+			container: document.querySelector('.chart5'),
+			width: 400,
+			height: 250,
+			theme: 'default',
+			geometryType: 'line'
+		})
+		.setData(dataUnequal);
+
+	var chart6 = firespray.chart()
+		.setConfig({
+			container: document.querySelector('.chart6'),
+			width: 400,
+			height: 250,
+			theme: 'default',
+			geometryType: 'line'
+		})
+		.setData(dataDays);
 
 </script>
 </body>

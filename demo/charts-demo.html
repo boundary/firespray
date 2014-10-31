@@ -5,7 +5,7 @@
 	<title>Chart demo</title>
 	<script src="../lib/d3.js"></script>
 	<script src="../lib/render-queue.js"></script>
-	<script src="../src/firespray.js"></script>
+	<script src="../firespray.js"></script>
 	<style>
 		.container{
 			float: left;
@@ -48,7 +48,7 @@
 			"name": "line B"
 		}];
 
-	var firesprayChart1 = firespray()
+	var firesprayChart1 = firespray.chart()
 		.setConfig({
 			container: document.querySelector('.chart1'),
 			width: 600,
@@ -59,7 +59,7 @@
 		})
 		.setData(data);
 
-	var firesprayChart2 = firespray()
+	var firesprayChart2 = firespray.chart()
 		.setConfig({
 			container: document.querySelector('.chart2'),
 			width: 600,
@@ -70,7 +70,7 @@
 		})
 		.setData(data);
 
-	var firesprayChart3 = firespray()
+	var firesprayChart3 = firespray.chart()
 		.setConfig({
 			container: document.querySelector('.chart3'),
 			width: 600,
@@ -81,7 +81,7 @@
 		})
 		.setData([data[0]]);
 
-	var firesprayChart4 = firespray()
+	var firesprayChart4 = firespray.chart()
 		.setConfig({
 			container: document.querySelector('.chart4'),
 			width: 600,
@@ -92,7 +92,7 @@
 		})
 		.setData(data);
 
-	var firesprayChart4 = firespray()
+	var firesprayChart4 = firespray.chart()
 		.setConfig({
 			container: document.querySelector('.chart5'),
 			width: 600,

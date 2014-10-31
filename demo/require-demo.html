@@ -13,7 +13,7 @@
 		"baseUrl": "../",
 		"paths": {
 			"d3": "lib/d3",
-			"firespray": "src/firespray"
+			"firespray": "firespray"
 		},
 		"shim": {
 			"firespray": {
@@ -27,7 +27,7 @@
 
 		var data = firespray.utils.generateData({pointCount: 100, lineCount: 5});
 
-		var chart = firespray()
+		var chart = firespray.chart()
 			.setConfig({
 				container: document.querySelector('.chart1'),
 				width: 600,

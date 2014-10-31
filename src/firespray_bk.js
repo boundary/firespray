@@ -249,14 +249,6 @@
 
 		// Convenience functions
 		///////////////////////////////////////////////////////////
-		function getFirstDataValue(){
-			if(hasValidData()) {return data[0].values[0];}
-		}
-
-		function getLastDataValue(){
-			if(hasValidData()) {return data[0].values[data[0].values.length-1];}
-		}
-
 		function hasValidData(){
 			return (data && data.length !== 0 && data[0].values.length !== 0);
 		}
