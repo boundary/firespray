@@ -31,6 +31,12 @@ Streaming charts library developed by [Boundary](http://boundary.com/)
 <img src="img/progressive_rendering.png" style="width:500px"/>
 <br /><br />
 
+## Canvas and SVG renderers
+
+#### Canvas for large datasets, SVG for crisp lines at any zoom level
+<img src="img/chart_svg_canvas.png" style="width:500px"/>
+<br />
+
 ## Live examples 
 * [Examples on Plunker](http://plnkr.co/edit/uqBDIJsqGlM2E8zNmy5J?p=preview)
 * [Time slider](http://bl.ocks.org/biovisualize/raw/bdf17be85fc96d629ade/)
