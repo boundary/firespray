@@ -25,10 +25,12 @@ firespray.setupScales = function(config, cache){
 		else {cache.scaleY.range([cache.chartH, 0]);}
 
 		var scaleYCopy = cache.scaleY.copy();
-		if(config.geometryType === 'stackedLine' || config.geometryType === 'stackedArea'){
+		if(config.geometryType === 'stackedLine' ||
+			config.geometryType === 'stackedArea' ||
+			config.geometryType === 'stackedBar'){
 			var stackedMaxValues = d3.zip.apply(null, cache.data.map(function(d, i){
-				return d.values.map(function(d, i){ return d.y; });
-			}))
+					return d.values.map(function(d, i){ return d.y; });
+				}))
 				.map(function(d, i){ return d3.sum(d); });
 			var stackedMaxValueSum = d3.max(stackedMaxValues);
 			cache.extentY = [0, stackedMaxValueSum];

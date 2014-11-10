@@ -8,6 +8,7 @@ firespray.template = '<div>' +
 	'</g>' +
 	'</svg>' +
 	'<canvas class="geometry"></canvas>' +
+	'<svg xmlns="http://www.w3.org/2000/svg" class="geometry-svg"></svg>' +
 	'<svg xmlns="http://www.w3.org/2000/svg" class="axes">' +
 	'<g class="chart-group">' +
 	'<g class="axis-x"></g> <rect class="axis-y-bg" /><g class="axis-y axis-y2"></g><g class="axis-y axis-y1"></g>' +
@@ -28,7 +29,8 @@ firespray.themes = {
 	'.firespray-chart .stripe.even { fill: rgb(250, 250, 250); }' +
 	'.firespray-chart .panel-bg { fill: white; }' +
 	'.firespray-chart .axis-y line { stroke: #eee; }' +
-	'text { font-size: 10px; fill: #aaa; }',
+	'text { font-size: 10px; fill: #aaa; }'+
+	'.hovered-geometry, .hover-guide-x{ stroke: #555; }',
 
 	dark: '.firespray-chart .axis-x-bg {fill: #222; }' +
 	'.firespray-chart .axis-y-bg {fill: rgba(50, 50, 50, 0.5);}' +
@@ -36,5 +38,6 @@ firespray.themes = {
 	'.firespray-chart .stripe { fill: #222; }' +
 	'.firespray-chart .panel-bg { fill: #333; }' +
 	'.firespray-chart .axis-y line { stroke: #111; }' +
-	'text { font-size: 10px; fill: #aaa; }'
+	'text { font-size: 10px; fill: #aaa; }'+
+	'.hovered-geometry, .hover-guide-x{ stroke: #555; }'
 };

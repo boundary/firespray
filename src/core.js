@@ -12,6 +12,7 @@ firespray.chart = function module() {
 		bgSvg: null,
 		axesSvg: null,
 		geometryCanvas: null,
+		geometrySVG: null,
 		scaleX: d3.time.scale(),
 		scaleY: d3.scale.linear(),
 		isMirror: null,

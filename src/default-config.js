@@ -28,5 +28,6 @@ firespray.defaultConfig = {
 	progressiveRenderingRate: 300,
 	brushThrottleWaitDuration: 10,
 	useProgressiveRendering: true,
+	renderer: 'canvas',
 	theme: null // 'default'
 };

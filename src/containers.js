@@ -3,7 +3,6 @@
 firespray.setupContainers = function(config, cache){
 	var cache = this.cache;
 	var config = this.config;
-	console.log(this);
 
 	// Template
 	if(!cache.root && config.container){
@@ -16,6 +15,7 @@ firespray.setupContainers = function(config, cache){
 		cache.axesSvg = cache.root.select('svg.axes');
 		cache.interactionSvg = cache.root.select('svg.interaction').attr({id: Math.random()});
 		cache.geometryCanvas = cache.root.select('canvas.geometry');
+		cache.geometrySVG = cache.root.select('svg.geometry-svg');
 		cache.root.selectAll('svg, canvas').style({position: 'absolute'});
 	}
 
