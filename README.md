@@ -3,8 +3,6 @@ Firespray
 
 Streaming charts library developed by [Boundary](http://boundary.com/)
 
-[http://biovisualize.github.io/firespray/](http://biovisualize.github.io/firespray/)
-
 <div align="center"><img src="img/firespray_500.png" /></div>
 
 
@@ -33,11 +31,15 @@ Streaming charts library developed by [Boundary](http://boundary.com/)
 <img src="img/progressive_rendering.png" style="width:500px"/>
 <br /><br />
 
-## Live examples 
-#### (More examples in the test folder)
-* [Live examples on Plunker](http://plnkr.co/edit/uqBDIJsqGlM2E8zNmy5J?p=preview)
+## Canvas and SVG renderers
 
-## Coming soon...
-* Documentation
-* More usage examples
+#### Canvas for large datasets, SVG for crisp lines at any zoom level
+<img src="img/chart_svg_canvas.png" style="width:500px"/>
+<br />
+
+## Live examples 
+* [Examples on Plunker](http://plnkr.co/edit/uqBDIJsqGlM2E8zNmy5J?p=preview)
+* More examples in the [demo folder](https://github.com/biovisualize/firespray/tree/master/demo)
+* Older [Time slider](http://bl.ocks.org/biovisualize/raw/bdf17be85fc96d629ade/)
+* Older [Tooltip and info table](http://bl.ocks.org/biovisualize/raw/26c96d4ba4d60c17d64b/)
 
