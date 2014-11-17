@@ -12,7 +12,8 @@ firespray.setupAxisY = function (config, cache){
 	var scaleYCopy = cache.scaleY.copy();
 	if(config.geometryType === 'stackedLine' ||
 		config.geometryType === 'stackedArea' ||
-		config.geometryType === 'stackedBar'){
+		config.geometryType === 'stackedBar' ||
+		config.geometryType === 'percentBar'){
 		var stackedMaxValues = d3.zip.apply(null, cache.data.map(function(d, i){
 				return d.values.map(function(d, i){ return d.y; });
 			}))

@@ -26,21 +26,21 @@
 
 		var themes = {
 			default: '.firespray-chart .axis-x-bg {fill: rgba(220, 220, 220, 1); }' +
-			'.firespray-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}' +
-			'.firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }' +
-			'.firespray-chart .stripe { fill: none; }' +
-			'.firespray-chart .stripe.even { fill: rgb(250, 250, 250); }' +
-			'.firespray-chart .panel-bg { fill: white; }' +
-			'.firespray-chart .axis-y line { stroke: #eee; }' +
-			'text { font-size: 10px; fill: #aaa; }',
+				'.firespray-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}' +
+				'.firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }' +
+				'.firespray-chart .stripe { fill: none; }' +
+				'.firespray-chart .stripe.even { fill: rgb(250, 250, 250); }' +
+				'.firespray-chart .panel-bg { fill: white; }' +
+				'.firespray-chart .axis-y line { stroke: #eee; }' +
+				'text { font-size: 10px; fill: #aaa; }',
 
 			dark: '.firespray-chart .axis-x-bg {fill: #222; }' +
-			'.firespray-chart .axis-y-bg {fill: rgba(50, 50, 50, 0.5);}' +
-			'.firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }' +
-			'.firespray-chart .stripe { fill: #222; }' +
-			'.firespray-chart .panel-bg { fill: #333; }' +
-			'.firespray-chart .axis-y line { stroke: #111; }' +
-			'text { font-size: 10px; fill: #aaa; }'
+				'.firespray-chart .axis-y-bg {fill: rgba(50, 50, 50, 0.5);}' +
+				'.firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }' +
+				'.firespray-chart .stripe { fill: #222; }' +
+				'.firespray-chart .panel-bg { fill: #333; }' +
+				'.firespray-chart .axis-y line { stroke: #111; }' +
+				'text { font-size: 10px; fill: #aaa; }'
 		};
 
 		// Configuration and cached variables
@@ -92,7 +92,7 @@
 				.on('mouseout', function () {
 					var svg = cache.interactionSvg.node();
 					var target = d3.event.relatedTarget;
-					if((svg.contains && !svg.contains(target)) || 
+					if((svg.contains && !svg.contains(target)) ||
 						(svg.compareDocumentPosition && !svg.compareDocumentPosition(target))) {
 						cache.interactionSvg.select('.hover-group').style({visibility: 'hidden'});
 						dispatch.chartOut.call(exports);
@@ -525,9 +525,9 @@
 
 			// line geometry
 			cache.geometryCanvas.attr({
-					width: cache.chartW,
-					height: cache.chartH
-				})
+				width: cache.chartW,
+				height: cache.chartH
+			})
 				.style({
 					top: config.margin.top + 'px',
 					left: config.margin.left + 'px'
@@ -543,8 +543,8 @@
 			var scaleYCopy = cache.scaleY.copy(); //TODO ?
 			if(config.geometryType === 'stackedLine' || config.geometryType === 'stackedArea'){
 				var stackedMaxValues = d3.zip.apply(null, data.map(function(d, i){
-						return d.values.map(function(d, i){ return d.y; });
-					}))
+					return d.values.map(function(d, i){ return d.y; });
+				}))
 					.map(function(d, i){ return d3.sum(d); });
 				var stackedMaxValueSum = d3.max(stackedMaxValues);
 				scaleYCopy.domain([0, stackedMaxValueSum]);
@@ -747,9 +747,9 @@
 			var dataSlice = firespray.utils.cloneJSON(data)
 				.map(function(d){
 					d.values = d.values.map(function(dB){
-							dB.x = new Date(dB.x);
-							return dB;
-						})
+						dB.x = new Date(dB.x);
+						return dB;
+					})
 						.filter(function(dB){
 							return dB.x.getTime() >= _sliceExtentX[0] && dB.x.getTime() <= _sliceExtentX[1];
 						});
@@ -886,9 +886,9 @@
 		},
 		generateDataPoint: function(options, i){
 			var point = {
-					x: options.epoch,
-					y: Math.random()*100
-				};
+				x: options.epoch,
+				y: Math.random()*100
+			};
 			if(options.valueCount > 1) {point.y2 = Math.random()*100;}
 			return point;
 		},

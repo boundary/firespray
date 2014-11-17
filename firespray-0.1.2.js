@@ -1,9 +1,8 @@
 var firespray = {
-    version: "0.1.1"
+    version: "0.1.2"
 };
 
 firespray.chart = function module() {
-    this.test = Math.random();
     var that = this;
     var config = firespray.utils.cloneJSON(firespray.defaultConfig);
     var cache = {
@@ -12,6 +11,7 @@ firespray.chart = function module() {
         bgSvg: null,
         axesSvg: null,
         geometryCanvas: null,
+        geometrySVG: null,
         scaleX: d3.time.scale(),
         scaleY: d3.scale.linear(),
         isMirror: null,
@@ -25,9 +25,12 @@ firespray.chart = function module() {
         queues: []
     };
     var dispatch = d3.dispatch("brushChange", "brushDragStart", "brushDragMove", "brushDragEnd", "geometryHover", "geometryOut", "geometryClick", "chartHover", "chartOut", "chartEnter");
+    this.cache = cache;
+    this.config = config;
+    this.dispatch = dispatch;
     var exports = {
         render: function() {
-            firespray.setupContainers(config, cache);
+            firespray.setupContainers();
             firespray.setupScales(config, cache);
             firespray.setupAxisY(config, cache);
             firespray.setupAxisX(config, cache);
@@ -100,7 +103,17 @@ firespray.chart = function module() {
                 return;
             }
             var hoverPosX = cache.scaleX(_dateX);
-            that.showHovering(hoverPosX);
+            var closestPointsScaledX = firespray._hovering.injectClosestPointsFromX(hoverPosX, config, cache);
+            cache.interactionSvg.select(".hover-group").style({
+                visibility: "visible"
+            });
+            if (typeof closestPointsScaledX !== "undefined") {
+                firespray._hovering.displayHoveredGeometry(config, cache, dispatch);
+                firespray._hovering.displayVerticalGuide(closestPointsScaledX, config, cache);
+            } else {
+                firespray._hovering.hideHoveredGeometry(config, cache, dispatch);
+                firespray._hovering.displayVerticalGuide(hoverPosX, config, cache);
+            }
             return this;
         },
         brushIsFarRight: function() {
@@ -187,6 +200,7 @@ firespray.defaultConfig = {
     progressiveRenderingRate: 300,
     brushThrottleWaitDuration: 10,
     useProgressiveRendering: true,
+    renderer: "canvas",
     theme: null
 };
 
@@ -431,17 +445,17 @@ firespray._hovering = {
                 return d.color || "silver";
             }
         }).attr({
+            x: function(d) {
+                return d.scaledX - d.barW / 2;
+            },
+            y: function(d) {
+                return d.scaledY;
+            },
             width: function(d) {
                 return d.barW;
             },
             height: function(d) {
-                return d.scaledY;
-            },
-            x: function(d) {
-                return d.scaledX - d.barW / 2;
-            },
-            y: function(d, i) {
-                return cache.chartH - d.topY + config.margin.top;
+                return d.stackTopY - d.scaledY;
             }
         });
         hoveredDotsSelection.exit().remove();
@@ -463,25 +477,11 @@ firespray._hovering = {
     }
 };
 
-firespray.showHovering = function(hoverPosX) {
-    var closestPointsScaledX = firespray._hovering.injectClosestPointsFromX(hoverPosX);
-    cache.interactionSvg.select(".hover-group").style({
-        visibility: "visible"
-    });
-    if (typeof closestPointsScaledX !== "undefined") {
-        firespray._hovering.displayHoveredGeometry(config, cache, dispatch);
-        firespray._hovering.displayVerticalGuide(closestPointsScaledX);
-    } else {
-        firespray._hovering.hideHoveredGeometry(config, cache, dispatch);
-        firespray._hovering.displayVerticalGuide(hoverPosX);
-    }
-};
-
-firespray.template = "<div>" + '<svg xmlns="http://www.w3.org/2000/svg" class="bg">' + '<g class="chart-group">' + '<g class="background"><rect class="panel-bg" /></g>' + '<g class="axis-y axis-y2"></g><g class="axis-y axis-y1"></g> <g class="axis-x"></g><rect class="axis-x-bg" />' + "</g>" + "</svg>" + '<canvas class="geometry"></canvas>' + '<svg xmlns="http://www.w3.org/2000/svg" class="axes">' + '<g class="chart-group">' + '<g class="axis-x"></g> <rect class="axis-y-bg" /><g class="axis-y axis-y2"></g><g class="axis-y axis-y1"></g>' + "</g>" + "</svg>" + '<svg xmlns="http://www.w3.org/2000/svg" class="interaction">' + '<g class="hover-group"><line class="hover-guide-x"/>' + '<rect class="hover-rect" width="100%" height="100%" pointer-events="all" fill="none"/></rect>' + '</g><g class="brush-group"></g>' + "</svg>" + "</div>";
+firespray.template = "<div>" + '<svg xmlns="http://www.w3.org/2000/svg" class="bg">' + '<g class="chart-group">' + '<g class="background"><rect class="panel-bg" /></g>' + '<g class="axis-y axis-y2"></g><g class="axis-y axis-y1"></g> <g class="axis-x"></g><rect class="axis-x-bg" />' + "</g>" + "</svg>" + '<canvas class="geometry"></canvas>' + '<svg xmlns="http://www.w3.org/2000/svg" class="geometry-svg"></svg>' + '<svg xmlns="http://www.w3.org/2000/svg" class="axes">' + '<g class="chart-group">' + '<g class="axis-x"></g> <rect class="axis-y-bg" /><g class="axis-y axis-y2"></g><g class="axis-y axis-y1"></g>' + "</g>" + "</svg>" + '<svg xmlns="http://www.w3.org/2000/svg" class="interaction">' + '<g class="hover-group"><line class="hover-guide-x"/>' + '<rect class="hover-rect" width="100%" height="100%" pointer-events="all" fill="none"/></rect>' + '</g><g class="brush-group"></g>' + "</svg>" + "</div>";
 
 firespray.themes = {
-    "default": ".firespray-chart .axis-x-bg {fill: rgba(220, 220, 220, 1); }" + ".firespray-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}" + ".firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".firespray-chart .stripe { fill: none; }" + ".firespray-chart .stripe.even { fill: rgb(250, 250, 250); }" + ".firespray-chart .panel-bg { fill: white; }" + ".firespray-chart .axis-y line { stroke: #eee; }" + "text { font-size: 10px; fill: #aaa; }",
-    dark: ".firespray-chart .axis-x-bg {fill: #222; }" + ".firespray-chart .axis-y-bg {fill: rgba(50, 50, 50, 0.5);}" + ".firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".firespray-chart .stripe { fill: #222; }" + ".firespray-chart .panel-bg { fill: #333; }" + ".firespray-chart .axis-y line { stroke: #111; }" + "text { font-size: 10px; fill: #aaa; }"
+    "default": ".firespray-chart .axis-x-bg {fill: rgba(220, 220, 220, 1); }" + ".firespray-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}" + ".firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".firespray-chart .stripe { fill: none; }" + ".firespray-chart .stripe.even { fill: rgb(250, 250, 250); }" + ".firespray-chart .panel-bg { fill: white; }" + ".firespray-chart .axis-y line { stroke: #eee; }" + "text { font-size: 10px; fill: #aaa; }" + ".hovered-geometry, .hover-guide-x{ stroke: #555; }",
+    dark: ".firespray-chart .axis-x-bg {fill: #222; }" + ".firespray-chart .axis-y-bg {fill: rgba(50, 50, 50, 0.5);}" + ".firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".firespray-chart .stripe { fill: #222; }" + ".firespray-chart .panel-bg { fill: #333; }" + ".firespray-chart .axis-y line { stroke: #111; }" + "text { font-size: 10px; fill: #aaa; }" + ".hovered-geometry, .hover-guide-x{ stroke: #555; }"
 };
 
 firespray.setupScales = function(config, cache) {
@@ -507,7 +507,7 @@ firespray.setupScales = function(config, cache) {
             cache.scaleY.range([ cache.chartH, 0 ]);
         }
         var scaleYCopy = cache.scaleY.copy();
-        if (config.geometryType === "stackedLine" || config.geometryType === "stackedArea") {
+        if (config.geometryType === "stackedLine" || config.geometryType === "stackedArea" || config.geometryType === "stackedBar") {
             var stackedMaxValues = d3.zip.apply(null, cache.data.map(function(d, i) {
                 return d.values.map(function(d, i) {
                     return d.y;
@@ -583,7 +583,7 @@ firespray.setupAxisY = function(config, cache) {
         cache.scaleY.range([ cache.chartH, 0 ]);
     }
     var scaleYCopy = cache.scaleY.copy();
-    if (config.geometryType === "stackedLine" || config.geometryType === "stackedArea") {
+    if (config.geometryType === "stackedLine" || config.geometryType === "stackedArea" || config.geometryType === "stackedBar" || config.geometryType === "percentBar") {
         var stackedMaxValues = d3.zip.apply(null, cache.data.map(function(d, i) {
             return d.values.map(function(d, i) {
                 return d.y;
@@ -722,6 +722,8 @@ firespray.setupBrush = function(config, cache, dispatch) {
 };
 
 firespray.setupContainers = function(config, cache) {
+    var cache = this.cache;
+    var config = this.config;
     if (!cache.root && config.container) {
         var container = d3.select(config.container).append("div");
         container.html(firespray.template);
@@ -734,6 +736,7 @@ firespray.setupContainers = function(config, cache) {
             id: Math.random()
         });
         cache.geometryCanvas = cache.root.select("canvas.geometry");
+        cache.geometrySVG = cache.root.select("svg.geometry-svg");
         cache.root.selectAll("svg, canvas").style({
             position: "absolute"
         });
@@ -781,74 +784,80 @@ firespray.setupGeometries = function(config, cache) {
     if (!firespray.convenience.hasValidData(cache)) {
         return;
     }
+    firespray._computeGeometryData(config, cache);
     if (config.geometryType === "line" || config.geometryType === "stackedLine" || config.geometryType === "stackedArea") {
-        firespray.renderLineGeometry(config, cache);
+        firespray.setupLineGeometry(config, cache);
     } else if (config.geometryType === "bar" || config.geometryType === "percentBar" || config.geometryType === "stackedBar") {
-        firespray.renderBarGeometry(config, cache);
+        firespray.setupBarGeometry(config, cache);
     }
 };
 
-firespray.renderLineGeometry = function(config, cache) {
-    cache.geometryCanvas.attr({
-        width: cache.chartW,
-        height: cache.chartH
-    }).style({
-        top: config.margin.top + "px",
-        left: config.margin.left + "px"
-    });
-    var ctx = cache.geometryCanvas.node().getContext("2d");
-    ctx.globalCompositeOperation = "source-over";
+firespray.setupBarGeometry = function(config, cache) {
+    if (config.renderer === "canvas") {
+        firespray._renderBarGeometry(config, cache);
+    } else {
+        firespray._renderBarGeometrySVG(config, cache);
+    }
+};
+
+firespray.setupLineGeometry = function(config, cache) {
+    if (config.renderer === "canvas") {
+        firespray._renderLineGeometry(config, cache);
+    } else if (config.geometryType === "stackedArea") {
+        firespray._renderAreaGeometrySVG(config, cache);
+    } else {
+        firespray._renderLineGeometrySVG(config, cache);
+    }
+};
+
+firespray._computeGeometryData = function(config, cache) {
     if (cache.isMirror) {
         cache.scaleY.range([ cache.chartH / 2, 0 ]);
     } else {
         cache.scaleY.range([ cache.chartH, 0 ]);
     }
-    var scaleYCopy = cache.scaleY.copy();
-    if (config.geometryType === "stackedLine" || config.geometryType === "stackedArea") {
-        var stackedMaxValues = d3.zip.apply(null, cache.data.map(function(d, i) {
-            return d.values.map(function(d, i) {
-                return d.y;
-            });
-        })).map(function(d, i) {
+    var stackedValues = d3.zip.apply(null, cache.data.map(function(d, i) {
+        return d.values.map(function(d, i) {
+            return d.y;
+        });
+    }));
+    var stackedMaxValues;
+    if (config.geometryType === "stackedLine" || config.geometryType === "stackedArea" || config.geometryType === "stackedBar" || config.geometryType === "percentBar") {
+        stackedMaxValues = stackedValues.map(function(d, i) {
             return d3.sum(d);
         });
-        var stackedMaxValueSum = d3.max(stackedMaxValues);
-        scaleYCopy.domain([ 0, stackedMaxValueSum ]);
+    } else {
+        stackedMaxValues = stackedValues.map(function(d, i) {
+            return d3.max(d);
+        });
     }
+    var stackedMaxValue = d3.max(stackedMaxValues);
+    var scaleYCopy = cache.scaleY.copy();
+    scaleYCopy.domain([ 0, stackedMaxValue ]);
+    var barW = cache.scaleX(cache.data[0].values[1].x);
+    var barGap = Math.max(barW / 4, 1);
+    barW = Math.floor(barW - barGap);
+    barW = Math.max(1, barW);
     var i, j, lineData, datum, prevIndexI;
-    function renderLineSegment(datum) {
-        ctx.strokeStyle = datum.color;
-        ctx.fillStyle = datum.color;
-        ctx.beginPath();
-        ctx.moveTo(datum.prevScaledX, datum.prevScaledY);
-        ctx.lineTo(datum.scaledX, datum.scaledY);
-        if (config.geometryType === "stackedArea") {
-            ctx.lineTo(datum.scaledX, datum.stackTopY);
-            ctx.lineTo(datum.prevScaledX, datum.prevStackTopY);
-            ctx.lineTo(datum.prevScaledX, datum.prevScaledY);
-        }
-        if (cache.isMirror) {
-            ctx.moveTo(datum.prevScaledX, datum.prevScaledY2);
-            ctx.lineTo(datum.scaledX, datum.scaledY2);
-        }
-        ctx.fill();
-        ctx.stroke();
-    }
     var prevDatum;
     for (i = 0; i < cache.data.length; i++) {
         lineData = cache.data[i];
         prevDatum = lineData.values[0];
         for (j = 0; j < lineData.values.length; j++) {
+            if (config.geometryType === "percentBar") {
+                scaleYCopy.domain([ 0, stackedMaxValues[j] ]);
+            }
             datum = lineData.values[j];
             prevIndexI = Math.max(i - 1, 0);
             datum.scaledX = cache.scaleX(datum.x);
             datum.prevScaledX = prevDatum.scaledX;
-            datum.stackTopY = i === 0 || config.geometryType === "line" ? scaleYCopy.range()[0] : cache.data[prevIndexI].values[j].scaledY;
+            datum.stackTopY = i === 0 || config.geometryType === "line" || config.geometryType === "bar" ? scaleYCopy.range()[0] : cache.data[prevIndexI].values[j].scaledY;
             datum.scaledY = datum.stackTopY + scaleYCopy(datum.y) - scaleYCopy.range()[0];
             datum.prevStackTopY = prevDatum.stackTopY;
             datum.prevScaledY = prevDatum.scaledY;
             datum.color = lineData.color || "silver";
             datum.name = lineData.name;
+            datum.barW = barW;
             prevDatum = {
                 scaledX: datum.scaledX,
                 scaledY: datum.scaledY,
@@ -869,6 +878,93 @@ firespray.renderLineGeometry = function(config, cache) {
             }
         }
     }
+};
+
+firespray._renderAreaGeometrySVG = function(config, cache) {
+    cache.geometrySVG.attr({
+        width: cache.chartW,
+        height: cache.chartH
+    }).style({
+        top: config.margin.top + "px",
+        left: config.margin.left + "px"
+    });
+    var area = d3.svg.area().x(function(d) {
+        return d.scaledX;
+    }).y0(function(d) {
+        return d.stackTopY;
+    }).y1(function(d) {
+        return d.scaledY;
+    });
+    var lines = cache.geometrySVG.selectAll("path.geometry").data(cache.data);
+    lines.enter().append("path").classed("geometry", true);
+    lines.attr({
+        d: function(d) {
+            return area(d.values);
+        }
+    }).style({
+        stroke: function(d) {
+            return d.color;
+        },
+        fill: function(d) {
+            return d.color;
+        }
+    });
+};
+
+firespray._renderLineGeometrySVG = function(config, cache) {
+    cache.geometrySVG.attr({
+        width: cache.chartW,
+        height: cache.chartH
+    }).style({
+        top: config.margin.top + "px",
+        left: config.margin.left + "px"
+    });
+    var line = d3.svg.line().x(function(d) {
+        return d.scaledX;
+    }).y(function(d) {
+        return d.scaledY;
+    });
+    var lines = cache.geometrySVG.selectAll("path.geometry").data(cache.data);
+    lines.enter().append("path").classed("geometry", true);
+    lines.attr({
+        d: function(d) {
+            return line(d.values);
+        }
+    }).style({
+        stroke: function(d) {
+            return d.color;
+        },
+        fill: "none"
+    });
+};
+
+firespray._renderLineGeometry = function(config, cache) {
+    cache.geometryCanvas.attr({
+        width: cache.chartW,
+        height: cache.chartH
+    }).style({
+        top: config.margin.top + "px",
+        left: config.margin.left + "px"
+    });
+    var ctx = cache.geometryCanvas.node().getContext("2d");
+    function renderLineSegment(datum) {
+        ctx.strokeStyle = datum.color;
+        ctx.fillStyle = datum.color;
+        ctx.beginPath();
+        ctx.moveTo(datum.prevScaledX, datum.prevScaledY);
+        ctx.lineTo(datum.scaledX, datum.scaledY);
+        if (config.geometryType === "stackedArea") {
+            ctx.lineTo(datum.scaledX, datum.stackTopY);
+            ctx.lineTo(datum.prevScaledX, datum.prevStackTopY);
+            ctx.lineTo(datum.prevScaledX, datum.prevScaledY);
+        }
+        if (cache.isMirror) {
+            ctx.moveTo(datum.prevScaledX, datum.prevScaledY2);
+            ctx.lineTo(datum.scaledX, datum.scaledY2);
+        }
+        ctx.fill();
+        ctx.stroke();
+    }
     if (config.useProgressiveRendering && typeof renderQueue !== "undefined") {
         for (i = 0; i < cache.data.length; i++) {
             cache.queues.push(renderQueue(renderLineSegment).rate(config.progressiveRenderingRate));
@@ -886,7 +982,7 @@ firespray.renderLineGeometry = function(config, cache) {
     }
 };
 
-firespray.renderBarGeometry = function(config, cache) {
+firespray._renderBarGeometry = function(config, cache) {
     cache.geometryCanvas.attr({
         width: cache.chartW,
         height: cache.chartH
@@ -896,54 +992,13 @@ firespray.renderBarGeometry = function(config, cache) {
     });
     var ctx = cache.geometryCanvas.node().getContext("2d");
     ctx.globalCompositeOperation = "source-over";
-    cache.scaleY.range([ cache.chartH, 0 ]);
-    var i, j, lineData, datum, prevIndex;
-    var barW = cache.scaleX(cache.data[0].values[1].x);
-    var barGap = Math.max(barW / 4, 1);
-    barW = Math.floor(barW - barGap);
-    barW = Math.max(1, barW);
     function renderBar(datum) {
         ctx.strokeStyle = datum.color;
         ctx.lineWidth = datum.barW;
         ctx.beginPath();
-        ctx.moveTo(Math.floor(datum.scaledX), cache.chartH - Math.floor(datum.prevTopY));
-        ctx.lineTo(Math.floor(datum.scaledX), cache.chartH - Math.floor(datum.topY));
+        ctx.moveTo(Math.floor(datum.scaledX), Math.floor(datum.scaledY));
+        ctx.lineTo(Math.floor(datum.scaledX), Math.floor(datum.stackTopY));
         ctx.stroke();
-    }
-    var stackedMaxValues;
-    var stackedValues = d3.zip.apply(null, cache.data.map(function(d, i) {
-        return d.values.map(function(d, i) {
-            return d.y;
-        });
-    }));
-    if (config.geometryType === "bar") {
-        stackedMaxValues = stackedValues.map(function(d, i) {
-            return d3.max(d);
-        });
-    } else {
-        stackedMaxValues = stackedValues.map(function(d, i) {
-            return d3.sum(d);
-        });
-    }
-    var stackedMaxValueSum = d3.max(stackedMaxValues);
-    var scaleYCopy = cache.scaleY.copy();
-    scaleYCopy.domain([ 0, stackedMaxValueSum ]).range([ 0, cache.chartH ]);
-    for (i = 0; i < cache.data.length; i++) {
-        lineData = cache.data[i];
-        for (j = 0; j < lineData.values.length; j++) {
-            if (config.geometryType === "percentBar") {
-                scaleYCopy.domain([ 0, stackedMaxValues[j] ]).range([ 0, cache.chartH ]);
-            }
-            datum = lineData.values[j];
-            prevIndex = Math.max(j - 1, 0);
-            datum.scaledX = cache.scaleX(datum.x);
-            datum.scaledY = scaleYCopy(datum.y);
-            datum.prevTopY = i === 0 || config.geometryType === "bar" ? 0 : cache.data[Math.max(i - 1, 0)].values[j].topY;
-            datum.topY = datum.prevTopY + datum.scaledY;
-            datum.color = lineData.color || "silver";
-            datum.name = lineData.name;
-            datum.barW = barW;
-        }
     }
     if (config.useProgressiveRendering && typeof renderQueue !== "undefined") {
         for (i = 0; i < cache.data.length * 2; i++) {
@@ -960,4 +1015,42 @@ firespray.renderBarGeometry = function(config, cache) {
             });
         });
     }
+};
+
+firespray._renderBarGeometrySVG = function(config, cache) {
+    cache.geometrySVG.attr({
+        width: cache.chartW,
+        height: cache.chartH
+    }).style({
+        top: config.margin.top + "px",
+        left: config.margin.left + "px"
+    });
+    var barGroup = cache.geometrySVG.selectAll("g.geometry-group").data(cache.data);
+    barGroup.enter().append("g").classed("geometry-group", true);
+    barGroup.exit().remove();
+    var bars = barGroup.selectAll("rect.geometry").data(function(d) {
+        return d.values;
+    });
+    bars.enter().append("rect").classed("geometry", true);
+    bars.attr({
+        x: function(d) {
+            return d.scaledX - d.barW / 2;
+        },
+        y: function(d) {
+            return d.scaledY;
+        },
+        width: function(d) {
+            return d.barW;
+        },
+        height: function(d) {
+            return d.stackTopY - d.scaledY;
+        }
+    }).style({
+        stroke: function(d) {
+            return d.color;
+        },
+        fill: function(d) {
+            return d.color;
+        }
+    });
 };

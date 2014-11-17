@@ -1,3 +1,3 @@
 all:
-	uglifyjs ./src/core.js ./src/default-config.js ./src/util.js ./src/hovering.js ./src/templates.js ./src/scales.js ./src/axis-x.js ./src/axis-y.js ./src/stripes.js ./src/brush.js ./src/containers.js ./src/geometries.js -b -o firespray.js
-	uglifyjs ./src/core.js ./src/default-config.js ./src/util.js ./src/hovering.js ./src/templates.js ./src/scales.js ./src/axis-x.js ./src/axis-y.js ./src/stripes.js ./src/brush.js ./src/containers.js ./src/geometries.js -o firespray.min.js -c -m
+	uglifyjs ./src/core.js ./src/default-config.js ./src/util.js ./src/hovering.js ./src/templates.js ./src/scales.js ./src/axis-x.js ./src/axis-y.js ./src/stripes.js ./src/brush.js ./src/containers.js ./src/geometries.js -b -o firespray-0.1.2.js
+	uglifyjs ./src/core.js ./src/default-config.js ./src/util.js ./src/hovering.js ./src/templates.js ./src/scales.js ./src/axis-x.js ./src/axis-y.js ./src/stripes.js ./src/brush.js ./src/containers.js ./src/geometries.js -o firespray-0.1.2.min.js -c -m

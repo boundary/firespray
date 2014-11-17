@@ -149,12 +149,10 @@ firespray._hovering = {
 				fill: function (d) { return d.color || 'silver'; }
 			})
 			.attr({
+				x: function(d){ return d.scaledX - d.barW / 2; },
+				y: function(d){ return d.scaledY; },
 				width: function(d){ return d.barW; },
-				height: function(d){ return d.scaledY; },
-				x: function (d) { return d.scaledX - d.barW / 2; },
-				y: function (d, i) {
-					return cache.chartH - d.topY + config.margin.top;
-				}
+				height: function(d){ return d.stackTopY - d.scaledY; }
 			});
 		hoveredDotsSelection.exit().remove();
 		return this;
@@ -171,18 +169,3 @@ firespray._hovering = {
 		return this;
 	}
 };
-
-//firespray.showHovering = function(hoverPosX){
-//
-//	var closestPointsScaledX = firespray._hovering.injectClosestPointsFromX(hoverPosX);
-//	cache.interactionSvg.select('.hover-group').style({visibility: 'visible'});
-//	if (typeof closestPointsScaledX !== 'undefined') {
-//		firespray._hovering.displayHoveredGeometry(config, cache, dispatch);
-//		firespray._hovering.displayVerticalGuide(closestPointsScaledX);
-//	}
-//	else {
-//		firespray._hovering.hideHoveredGeometry(config, cache, dispatch);//TODO
-//		firespray._hovering.displayVerticalGuide(hoverPosX);
-//	}
-//};
-

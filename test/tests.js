@@ -25,7 +25,7 @@ describe('Firespray', function() {
 		var data = _data || firespray.utils.generateData(10, 2);
 		var config = _config || {};
 		config.container = container.node();
-		chart = firespray()
+		chart = firespray.chart()
 			.setConfig(config)
 			.setData(data);
 	}
@@ -46,7 +46,7 @@ describe('Firespray', function() {
 
 		it('works with minimal requirements', function() {
 			var container = document.querySelector('#fixture');
-			var chart = firespray()
+			var chart = firespray.chart()
 				.setConfig({container: container})
 				.setData(minimalData);
 
@@ -88,9 +88,9 @@ describe('Firespray', function() {
 			var secondDataset = firespray.utils.cloneJSON(minimalData);
 			secondDataset[0].values[0].x = 'Thu Oct 23 2014 09:28:30 GMT-0400 (EDT)';
 
-			expect(chart.getDataExtent().x[0].getTime()).to.equal(new Date('Thu Oct 23 2014 09:28:40 GMT-0400 (EDT)').getTime());
+			expect(chart.getDataExtent().x[0]).to.equal(new Date('Thu Oct 23 2014 09:28:40 GMT-0400 (EDT)').getTime());
 			chart.setData(secondDataset);
-			expect(chart.getDataExtent().x[0].getTime()).to.equal(new Date('Thu Oct 23 2014 09:28:30 GMT-0400 (EDT)').getTime());
+			expect(chart.getDataExtent().x[0]).to.equal(new Date('Thu Oct 23 2014 09:28:30 GMT-0400 (EDT)').getTime());
 
 			removeChart();
 		});
@@ -100,7 +100,7 @@ describe('Firespray', function() {
 	describe('Data', function() {
 
 		it('generates some data for testing', function() {
-			var dummyData = firespray.utils.generateData(10, 2);
+			var dummyData = firespray.utils.generateData({pointCount: 10, lineCount: 2});
 
 			var lineCount = dummyData.length;
 			var pointCount = dummyData[0].values.length;
@@ -111,8 +111,8 @@ describe('Firespray', function() {
 		it('gets data extent', function() {
 			addChart(null, minimalData);
 
-			expect(chart.getDataExtent().x[0].getTime()).to.equal(new Date('Thu Oct 23 2014 09:28:40 GMT-0400 (EDT)').getTime());
-			expect(chart.getDataExtent().x[1].getTime()).to.equal(new Date('Thu Oct 23 2014 09:28:50 GMT-0400 (EDT)').getTime());
+			expect(chart.getDataExtent().x[0]).to.equal(new Date('Thu Oct 23 2014 09:28:40 GMT-0400 (EDT)').getTime());
+			expect(chart.getDataExtent().x[1]).to.equal(new Date('Thu Oct 23 2014 09:28:50 GMT-0400 (EDT)').getTime());
 
 			removeChart();
 		});
@@ -129,7 +129,6 @@ describe('Firespray', function() {
 				expect(firstLineData.name).to.equal('Data 1');
 				expect(d[0].closestValue.x.getTime()).to.equal(new Date('Thu Oct 23 2014 09:28:40 GMT-0400 (EDT)').getTime());
 				expect(d[0].closestValue.y).to.equal(1);
-				expect(this).to.equal(chart);
 
 				removeChart();
 				done();

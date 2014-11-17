@@ -35,6 +35,18 @@
 
 	var data = firespray.utils.generateData({pointCount: 100, lineCount: 5});
 
+//	var data = [
+//		{
+//			name: 'a',
+//			color: 'skyblue',
+//			values: [
+//				{x: 1414291072000, y: 10},
+//				{x: 1414291073000, y: 1},
+//				{x: 1414291074000, y: 4}
+//			]
+//		}
+//	];
+
 	var chart = firespray.chart()
 		.setConfig({
 			container: document.querySelector('.chart1'),
@@ -44,8 +56,11 @@
 //			useBrush: true,
 			progressiveRenderingRate: 1,
 			renderer: 'SVG',
-//        	geometryType: 'stackedArea'
-        	geometryType: 'line'
+        	geometryType: 'stackedArea'
+//        	geometryType: 'stackedBar'
+//        	geometryType: 'bar'
+//        	geometryType: 'percentBar'
+//        	geometryType: 'line'
 		})
 		.on('chartHover', function(a, b){
 			var dateX = a[0].closestValue.x;
@@ -61,6 +76,7 @@
 				theme: 'default',
 //			useBrush: true,
 				geometryType: 'stackedBar'
+//				geometryType: 'bar'
 			})
 			.setData(data);
 

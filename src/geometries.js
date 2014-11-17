@@ -5,16 +5,26 @@ firespray.setupGeometries = function(config, cache){
 
 	if(!firespray.convenience.hasValidData(cache)) {return;} //TODO get rid of these checks
 
+	firespray._computeGeometryData(config, cache);
+
 	if(config.geometryType === 'line' ||
 		config.geometryType === 'stackedLine' ||
 		config.geometryType === 'stackedArea') {firespray.setupLineGeometry(config, cache);}
 	else if(config.geometryType === 'bar' ||
 		config.geometryType === 'percentBar' ||
-		config.geometryType === 'stackedBar') {firespray.renderBarGeometry(config, cache);}
+		config.geometryType === 'stackedBar') {firespray.setupBarGeometry(config, cache);}
+};
+
+firespray.setupBarGeometry = function(config, cache){
+	if(config.renderer === 'canvas'){
+		firespray._renderBarGeometry(config, cache);
+	}
+	else {
+		firespray._renderBarGeometrySVG(config, cache);
+	}
 };
 
 firespray.setupLineGeometry = function(config, cache){
-	firespray._computeGeometryData(config, cache);
 	if(config.renderer === 'canvas'){
 		firespray._renderLineGeometry(config, cache);
 	}
@@ -28,20 +38,33 @@ firespray.setupLineGeometry = function(config, cache){
 
 firespray._computeGeometryData = function(config, cache){
 
-	if (cache.isMirror) {cache.scaleY.range([cache.chartH / 2, 0]);} // TODO use in common with  setupAxisY
+	if (cache.isMirror) {cache.scaleY.range([cache.chartH / 2, 0]);}
 	else {cache.scaleY.range([cache.chartH, 0]);}
 
-	var scaleYCopy = cache.scaleY.copy(); //TODO ?
+	var stackedValues = d3.zip.apply(null, cache.data.map(function(d, i){
+		return d.values.map(function(d, i){ return d.y; });
+	}));
+	var stackedMaxValues;
+
 	if(config.geometryType === 'stackedLine' ||
-		config.geometryType === 'stackedArea' ||
-		config.geometryType === 'stackedBar'){
-		var stackedMaxValues = d3.zip.apply(null, cache.data.map(function(d, i){
-				return d.values.map(function(d, i){ return d.y; });
-			}))
-			.map(function(d, i){ return d3.sum(d); });
-		var stackedMaxValueSum = d3.max(stackedMaxValues);
-		scaleYCopy.domain([0, stackedMaxValueSum]);
+			config.geometryType === 'stackedArea' ||
+			config.geometryType === 'stackedBar' ||
+		config.geometryType === 'percentBar'){
+		stackedMaxValues = stackedValues.map(function(d, i){ return d3.sum(d); });
 	}
+	else{
+		stackedMaxValues = stackedValues.map(function(d, i){ return d3.max(d); });
+	}
+
+	var stackedMaxValue = d3.max(stackedMaxValues);
+	var scaleYCopy = cache.scaleY.copy(); //TODO ?
+	scaleYCopy.domain([0, stackedMaxValue]);
+
+	// bar width
+	var barW = cache.scaleX(cache.data[0].values[1].x);
+	var barGap = Math.max(barW/4, 1);
+	barW = Math.floor(barW - barGap);
+	barW = Math.max(1, barW);
 
 	var i, j, lineData, datum, prevIndexI;
 
@@ -50,16 +73,18 @@ firespray._computeGeometryData = function(config, cache){
 		lineData = cache.data[i];
 		prevDatum = lineData.values[0];
 		for (j = 0; j < lineData.values.length; j++) {
+			if(config.geometryType === 'percentBar') {scaleYCopy.domain([0, stackedMaxValues[j]]);}
 			datum = lineData.values[j];
 			prevIndexI = Math.max(i-1, 0);
 			datum.scaledX = cache.scaleX(datum.x);
 			datum.prevScaledX = prevDatum.scaledX;
-			datum.stackTopY = (i === 0 || config.geometryType === 'line') ? scaleYCopy.range()[0] : cache.data[prevIndexI].values[j].scaledY;
+			datum.stackTopY = (i === 0 || config.geometryType === 'line' || config.geometryType === 'bar') ? scaleYCopy.range()[0] : cache.data[prevIndexI].values[j].scaledY;
 			datum.scaledY = datum.stackTopY + scaleYCopy(datum.y) - scaleYCopy.range()[0];
 			datum.prevStackTopY = prevDatum.stackTopY;
 			datum.prevScaledY = prevDatum.scaledY;
 			datum.color = lineData.color || 'silver';
 			datum.name = lineData.name;
+			datum.barW = barW;
 			prevDatum = {scaledX: datum.scaledX, scaledY: datum.scaledY, stackTopY: datum.stackTopY};
 		}
 	}
@@ -81,7 +106,8 @@ firespray._computeGeometryData = function(config, cache){
 };
 
 firespray._renderAreaGeometrySVG = function(config, cache){
-	// area geometry
+
+	// area geometry SVG
 	cache.geometrySVG.attr({
 			width: cache.chartW,
 			height: cache.chartH
@@ -98,7 +124,7 @@ firespray._renderAreaGeometrySVG = function(config, cache){
 
 
 	var lines = cache.geometrySVG.selectAll('path.geometry').data(cache.data);
-	lines.enter().append('path').classed('geometry');
+	lines.enter().append('path').classed('geometry', true);
 	lines.attr({
 			d: function(d){ return area(d.values); }
 		})
@@ -111,7 +137,7 @@ firespray._renderAreaGeometrySVG = function(config, cache){
 
 firespray._renderLineGeometrySVG = function(config, cache){
 
-	// line geometry
+	// line geometry SVG
 	cache.geometrySVG.attr({
 			width: cache.chartW,
 			height: cache.chartH
@@ -126,20 +152,20 @@ firespray._renderLineGeometrySVG = function(config, cache){
 		.y(function(d){ return d.scaledY; });
 
 	var lines = cache.geometrySVG.selectAll('path.geometry').data(cache.data);
-	lines.enter().append('path').classed('geometry');
+	lines.enter().append('path').classed('geometry', true);
 	lines.attr({
-		d: function(d){ return line(d.values); }
-	})
-	.style({
-		stroke: function(d){ return d.color; },
-		fill: 'none'
-	});
+			d: function(d){ return line(d.values); }
+		})
+		.style({
+			stroke: function(d){ return d.color; },
+			fill: 'none'
+		});
 
 };
 
 firespray._renderLineGeometry = function(config, cache){
 
-	// line geometry
+	// line geometry canvas
 	cache.geometryCanvas.attr({
 			width: cache.chartW,
 			height: cache.chartH
@@ -149,9 +175,6 @@ firespray._renderLineGeometry = function(config, cache){
 			left: config.margin.left + 'px'
 		});
 	var ctx = cache.geometryCanvas.node().getContext('2d');
-	ctx.globalCompositeOperation = "source-over";
-//                ctx.translate(0.5, 0.5);
-//                ctx.lineWidth = 1.5;
 
 	function renderLineSegment(datum){
 		ctx.strokeStyle = datum.color;
@@ -184,10 +207,10 @@ firespray._renderLineGeometry = function(config, cache){
 	else {cache.data.forEach(function(d, i){ d.values.forEach(function(d){ renderLineSegment(d); }); });}
 };
 
-firespray.renderBarGeometry = function(config, cache){
+firespray._renderBarGeometrySVG = function(config, cache){
 
-	// line geometry
-	cache.geometryCanvas.attr({
+	// bar geometry SVG
+	cache.geometrySVG.attr({
 		width: cache.chartW,
 		height: cache.chartH
 	})
@@ -195,58 +218,48 @@ firespray.renderBarGeometry = function(config, cache){
 			top: config.margin.top + 'px',
 			left: config.margin.left + 'px'
 		});
+
+	var barGroup = cache.geometrySVG.selectAll('g.geometry-group').data(cache.data);
+	barGroup.enter().append('g').classed('geometry-group', true);
+	barGroup.exit().remove();
+
+	var bars = barGroup.selectAll('rect.geometry').data(function(d){ return d.values; });
+	bars.enter().append('rect').classed('geometry', true);
+	bars.attr({
+		x: function(d){ return d.scaledX - d.barW / 2; },
+		y: function(d){ return d.scaledY; },
+		width: function(d){ return d.barW; },
+		height: function(d){ return d.stackTopY - d.scaledY; }
+	})
+		.style({
+			stroke: function(d){ return d.color; },
+			fill: function(d){ return d.color; }
+		});
+
+};
+
+firespray._renderBarGeometry = function(config, cache){
+
+	// bar geometry canvas
+	cache.geometryCanvas.attr({
+			width: cache.chartW,
+			height: cache.chartH
+		})
+		.style({
+			top: config.margin.top + 'px',
+			left: config.margin.left + 'px'
+		});
 	var ctx = cache.geometryCanvas.node().getContext('2d');
 	ctx.globalCompositeOperation = "source-over";
-
-	cache.scaleY.range([cache.chartH, 0]);
-
-	var i, j, lineData, datum, prevIndex;
-
-	// bar width
-	var barW = cache.scaleX(cache.data[0].values[1].x);
-	var barGap = Math.max(barW/4, 1);
-	barW = Math.floor(barW - barGap);
-	barW = Math.max(1, barW);
 
 	// hover
 	function renderBar(datum){
 		ctx.strokeStyle = datum.color;
 		ctx.lineWidth = datum.barW;
 		ctx.beginPath();
-		ctx.moveTo(Math.floor(datum.scaledX), cache.chartH - Math.floor(datum.prevTopY));
-		ctx.lineTo(Math.floor(datum.scaledX), cache.chartH - Math.floor(datum.topY));
+		ctx.moveTo(Math.floor(datum.scaledX), Math.floor(datum.scaledY));
+		ctx.lineTo(Math.floor(datum.scaledX), Math.floor(datum.stackTopY));
 		ctx.stroke();
-	}
-
-	var stackedMaxValues;
-	var stackedValues = d3.zip.apply(null, cache.data.map(function(d, i){
-		return d.values.map(function(d, i){ return d.y; });
-	}));
-	if(config.geometryType === 'bar'){
-		stackedMaxValues = stackedValues.map(function(d, i){ return d3.max(d); });
-	}
-	else{
-		stackedMaxValues = stackedValues.map(function(d, i){ return d3.sum(d); });
-	}
-	var stackedMaxValueSum = d3.max(stackedMaxValues);
-
-	var scaleYCopy = cache.scaleY.copy();
-	scaleYCopy.domain([0, stackedMaxValueSum]).range([0, cache.chartH]);
-
-	for (i = 0; i < cache.data.length; i++) {
-		lineData = cache.data[i];
-		for (j = 0; j < lineData.values.length; j++) {
-			if(config.geometryType === 'percentBar') {scaleYCopy.domain([0, stackedMaxValues[j]]).range([0, cache.chartH]);}
-			datum = lineData.values[j];
-			prevIndex = Math.max(j-1, 0);
-			datum.scaledX = cache.scaleX(datum.x);
-			datum.scaledY = scaleYCopy(datum.y);
-			datum.prevTopY = (i === 0 || config.geometryType === 'bar') ? 0 : cache.data[Math.max(i-1, 0)].values[j].topY;
-			datum.topY = (datum.prevTopY + datum.scaledY);
-			datum.color = lineData.color || 'silver';
-			datum.name = lineData.name;
-			datum.barW = barW;
-		}
 	}
 
 	if(config.useProgressiveRendering && typeof renderQueue !== 'undefined'){ //TODO share with renderLineGeometry

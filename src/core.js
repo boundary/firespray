@@ -1,4 +1,4 @@
-var firespray = {version: '0.1.1'};
+var firespray = {version: '0.1.2'};
 
 firespray.chart = function module() {
 	var that = this;
