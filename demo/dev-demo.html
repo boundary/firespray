@@ -33,7 +33,7 @@
 
 <script>
 
-	var data = firespray.utils.generateData({pointCount: 100, lineCount: 5});
+	var data = firespray.utils.generateData({pointCount: 50, lineCount: 100});
 
 //	var data = [
 //		{
@@ -50,13 +50,14 @@
 	var chart = firespray.chart()
 		.setConfig({
 			container: document.querySelector('.chart1'),
-			width: 600,
-			height: 400,
+			width: 800,
+			height: 200,
 			theme: 'default',
 //			useBrush: true,
 			progressiveRenderingRate: 1,
 			renderer: 'SVG',
-        	geometryType: 'stackedArea'
+//        	geometryType: 'stackedArea'
+        	geometryType: 'stackedLine'
 //        	geometryType: 'stackedBar'
 //        	geometryType: 'bar'
 //        	geometryType: 'percentBar'

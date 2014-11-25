@@ -3,28 +3,75 @@
 <head lang="en">
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<script src="../lib/d3.js"></script>
-	<script src="../firespray.js"></script>
+	<!--<script src="../firespray.js"></script>-->
+	<script src="../src/core.js"></script>
+	<script src="../src/default-config.js"></script>
+	<script src="../src/util.js"></script>
+	<script src="../src/hovering.js"></script>
+	<script src="../src/templates.js"></script>
+	<script src="../src/scales.js"></script>
+	<script src="../src/axis-x.js"></script>
+	<script src="../src/axis-y.js"></script>
+	<script src="../src/stripes.js"></script>
+	<script src="../src/brush.js"></script>
+	<script src="../src/containers.js"></script>
+	<script src="../src/geometries.js"></script>
+	<style>
+	</style>
 </head>
 <body>
 
-<div class="container chart1"></div>
+<script type="style" id="style1">
+	.axis-x-bg {fill: white;}
+	.axis-y-bg {fill: rgba(220, 220, 220, 0.5);}
+	.extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }
+	.stripe { fill: none; }
+	.stripe.even { fill: silver; }
+	.panel-bg { fill: white; }
+	.axis-y line { stroke: #eee; }
+	text { font-size: 10px; fill: #aaa; }
+	.hovered-geometry, .hover-guide-x{ stroke: #555; }
+	.axes .axis-x line{
+		stroke: silver;
+	}
+	.bg .axis-x line{
+		stroke: #eee;
+	}
+</script>
+
+<div id="chart1" class="container"></div>
 
 <script>
 
-	var data = firespray.utils.generateData({pointCount: 100, lineCount: 5});
+	var data = firespray.utils.generateData({pointCount: 5, lineCount: 1});
+//	var data = [
+//		{
+//			name: 'a',
+//			color: 'orange',
+//			values: [
+//				{x: 1414291072000, y: 10},
+//				{x: 1414291073000, y: 1},
+//				{x: 1414291074000, y: 5}
+//			]
+//		}
+//	];
 
-	var chart = firespray.chart()
+	firespray.chart()
 		.setConfig({
-			container: document.querySelector('.chart1'),
+			container: document.querySelector('#chart1'),
 			width: 600,
 			height: 400,
-			theme: 'dark',
+			showGridX: true,
+			showTicksX: true,
         	geometryType: 'line'
 		}).setData(data);
 
-	setTimeout(function(){
-		chart.setConfig({theme: 'default'}).refresh();
-	}, 500);
+	var style = document.head.querySelector('style');
+	function setStyle(selector){
+		style.innerHTML = document.querySelector(selector).innerText;
+	}
+
+	setStyle('#style1');
 
 </script>
 </body>

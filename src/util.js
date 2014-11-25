@@ -42,7 +42,7 @@ firespray.utils = {
 				options.epoch += 1000;
 				return firespray.utils.generateDataPoint(options);
 			}),
-			"color": colors[i],
+			"color": colors[i%(colors.length-1)],
 			"name": "line i"
 		};
 	},

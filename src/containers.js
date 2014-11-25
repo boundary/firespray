@@ -3,6 +3,9 @@
 firespray.setupContainers = function(config, cache){
 	var cache = this.cache;
 	var config = this.config;
+	if(!config.container){
+		throw 'A container is needed';
+	}
 
 	// Template
 	if(!cache.root && config.container){
