@@ -177,7 +177,8 @@ firespray.defaultConfig = {
         left: 0
     },
     container: null,
-    showTicksX: true,
+    showTicksX: false,
+    showGridX: false,
     showTicksY: true,
     useBrush: false,
     suggestedXTicks: 10,
@@ -257,7 +258,7 @@ firespray.utils = {
                 options.epoch += 1e3;
                 return firespray.utils.generateDataPoint(options);
             }),
-            color: colors[i],
+            color: colors[i % (colors.length - 1)],
             name: "line i"
         };
     },
@@ -477,11 +478,11 @@ firespray._hovering = {
     }
 };
 
-firespray.template = "<div>" + '<svg xmlns="http://www.w3.org/2000/svg" class="bg">' + '<g class="chart-group">' + '<g class="background"><rect class="panel-bg" /></g>' + '<g class="axis-y axis-y2"></g><g class="axis-y axis-y1"></g> <g class="axis-x"></g><rect class="axis-x-bg" />' + "</g>" + "</svg>" + '<canvas class="geometry"></canvas>' + '<svg xmlns="http://www.w3.org/2000/svg" class="geometry-svg"></svg>' + '<svg xmlns="http://www.w3.org/2000/svg" class="axes">' + '<g class="chart-group">' + '<g class="axis-x"></g> <rect class="axis-y-bg" /><g class="axis-y axis-y2"></g><g class="axis-y axis-y1"></g>' + "</g>" + "</svg>" + '<svg xmlns="http://www.w3.org/2000/svg" class="interaction">' + '<g class="hover-group"><line class="hover-guide-x"/>' + '<rect class="hover-rect" width="100%" height="100%" pointer-events="all" fill="none"/></rect>' + '</g><g class="brush-group"></g>' + "</svg>" + "</div>";
+firespray.template = "<div>" + '<svg xmlns="http://www.w3.org/2000/svg" class="bg">' + '<g class="chart-group">' + '<g class="background"><rect class="panel-bg" /></g>' + '<g class="axis-y axis-y2"></g><g class="axis-y axis-y1"></g><rect class="axis-x-bg" /><g class="axis-x"></g>' + "</g>" + "</svg>" + '<canvas class="geometry"></canvas>' + '<svg xmlns="http://www.w3.org/2000/svg" class="geometry-svg"></svg>' + '<svg xmlns="http://www.w3.org/2000/svg" class="axes">' + '<g class="chart-group">' + '<g class="axis-x"></g><rect class="axis-y-bg" /><g class="axis-y axis-y2"></g><g class="axis-y axis-y1"></g>' + "</g>" + "</svg>" + '<svg xmlns="http://www.w3.org/2000/svg" class="interaction">' + '<g class="hover-group"><line class="hover-guide-x"/>' + '<rect class="hover-rect" width="100%" height="100%" pointer-events="all" fill="none"/></rect>' + '</g><g class="brush-group"></g>' + "</svg>" + "</div>";
 
 firespray.themes = {
-    "default": ".firespray-chart .axis-x-bg {fill: rgba(220, 220, 220, 1); }" + ".firespray-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}" + ".firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".firespray-chart .stripe { fill: none; }" + ".firespray-chart .stripe.even { fill: rgb(250, 250, 250); }" + ".firespray-chart .panel-bg { fill: white; }" + ".firespray-chart .axis-y line { stroke: #eee; }" + "text { font-size: 10px; fill: #aaa; }" + ".hovered-geometry, .hover-guide-x{ stroke: #555; }",
-    dark: ".firespray-chart .axis-x-bg {fill: #222; }" + ".firespray-chart .axis-y-bg {fill: rgba(50, 50, 50, 0.5);}" + ".firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".firespray-chart .stripe { fill: #222; }" + ".firespray-chart .panel-bg { fill: #333; }" + ".firespray-chart .axis-y line { stroke: #111; }" + "text { font-size: 10px; fill: #aaa; }" + ".hovered-geometry, .hover-guide-x{ stroke: #555; }"
+    "default": ".firespray-chart .axis-x-bg {fill: rgba(220, 220, 220, 1); }" + ".firespray-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}" + ".firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".firespray-chart .stripe { fill: none; }" + ".firespray-chart .stripe.even { fill: rgb(250, 250, 250); }" + ".firespray-chart .panel-bg { fill: white; }" + ".firespray-chart .axis-y line { stroke: #eee; }" + ".firespray-chart  text { font-size: 10px; fill: #aaa; }" + ".firespray-chart  .hovered-geometry, .hover-guide-x{ stroke: #555; }" + ".firespray-chart  .domain{ display: none}",
+    dark: ".firespray-chart .axis-x-bg {fill: #222; }" + ".firespray-chart .axis-y-bg {fill: rgba(50, 50, 50, 0.5);}" + ".firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".firespray-chart .stripe { fill: #222; }" + ".firespray-chart .panel-bg { fill: #333; }" + ".firespray-chart .axis-y line { stroke: #111; }" + ".firespray-chart  text { font-size: 10px; fill: #aaa; }" + ".firespray-chart  .hovered-geometry, .hover-guide-x{ stroke: #555; }" + ".firespray-chart  .domain{ display: none}"
 };
 
 firespray.setupScales = function(config, cache) {
@@ -537,6 +538,7 @@ firespray.setupAxisX = function(config, cache) {
         transform: "translate(" + [ 0, cache.chartH - 2 ] + ")"
     });
     var axisX = d3.svg.axis().scale(cache.scaleX).orient("bottom").tickSize(cache.axisXHeight);
+    var textH = 12;
     if (config.showLabelsX) {
         if (typeof config.timeFormat === "function") {
             axisX.tickFormat(function(d) {
@@ -544,30 +546,37 @@ firespray.setupAxisX = function(config, cache) {
             });
         }
         axisXSelection.call(axisX);
-        var textH = 12;
         var textOffset = cache.axisXHeight / 2 + textH / 2;
         axisXSelection.selectAll("text").attr({
             transform: function() {
                 return "translate(3, -" + textOffset + ")";
             }
         });
-        axisXSelection.selectAll("line").remove();
+        if (config.showTicksX === false) {
+            axisXSelection.selectAll("line").remove();
+        } else {
+            axisXSelection.selectAll("line").attr({
+                y2: cache.axisXHeight / 2
+            });
+        }
+        axisXSelection.select(".domain").style({
+            display: "none"
+        });
     }
-    if (config.showTicksX) {
+    if (config.showGridX) {
         var bgXSelection = cache.bgSvg.select(".axis-x");
         bgXSelection.attr({
-            transform: "translate(" + [ 0, cache.chartH ] + ")"
+            transform: "translate(" + [ 0, cache.chartH - cache.axisXHeight ] + ")"
         });
         bgXSelection.call(axisX);
         bgXSelection.selectAll("text").text(null);
         bgXSelection.selectAll("line").attr({
             y1: -cache.chartH
         }).classed("grid-line x", true);
+        bgXSelection.select(".domain").style({
+            display: "none"
+        });
     }
-    cache.axesSvg.select(".domain").style({
-        fill: "none",
-        stroke: "none"
-    });
 };
 
 firespray.setupAxisY = function(config, cache) {
@@ -724,6 +733,9 @@ firespray.setupBrush = function(config, cache, dispatch) {
 firespray.setupContainers = function(config, cache) {
     var cache = this.cache;
     var config = this.config;
+    if (!config.container) {
+        throw "A container is needed";
+    }
     if (!cache.root && config.container) {
         var container = d3.select(config.container).append("div");
         container.html(firespray.template);
@@ -982,41 +994,6 @@ firespray._renderLineGeometry = function(config, cache) {
     }
 };
 
-firespray._renderBarGeometry = function(config, cache) {
-    cache.geometryCanvas.attr({
-        width: cache.chartW,
-        height: cache.chartH
-    }).style({
-        top: config.margin.top + "px",
-        left: config.margin.left + "px"
-    });
-    var ctx = cache.geometryCanvas.node().getContext("2d");
-    ctx.globalCompositeOperation = "source-over";
-    function renderBar(datum) {
-        ctx.strokeStyle = datum.color;
-        ctx.lineWidth = datum.barW;
-        ctx.beginPath();
-        ctx.moveTo(Math.floor(datum.scaledX), Math.floor(datum.scaledY));
-        ctx.lineTo(Math.floor(datum.scaledX), Math.floor(datum.stackTopY));
-        ctx.stroke();
-    }
-    if (config.useProgressiveRendering && typeof renderQueue !== "undefined") {
-        for (i = 0; i < cache.data.length * 2; i++) {
-            cache.queues.push(renderQueue(renderBar).rate(config.progressiveRenderingRate));
-            cache.queues.splice(cache.data.length);
-        }
-        cache.data.forEach(function(d, i) {
-            cache.queues[i](d.values);
-        });
-    } else {
-        cache.data.forEach(function(d, i) {
-            d.values.forEach(function(d) {
-                renderBar(d);
-            });
-        });
-    }
-};
-
 firespray._renderBarGeometrySVG = function(config, cache) {
     cache.geometrySVG.attr({
         width: cache.chartW,
@@ -1053,4 +1030,39 @@ firespray._renderBarGeometrySVG = function(config, cache) {
             return d.color;
         }
     });
+};
+
+firespray._renderBarGeometry = function(config, cache) {
+    cache.geometryCanvas.attr({
+        width: cache.chartW,
+        height: cache.chartH
+    }).style({
+        top: config.margin.top + "px",
+        left: config.margin.left + "px"
+    });
+    var ctx = cache.geometryCanvas.node().getContext("2d");
+    ctx.globalCompositeOperation = "source-over";
+    function renderBar(datum) {
+        ctx.strokeStyle = datum.color;
+        ctx.lineWidth = datum.barW;
+        ctx.beginPath();
+        ctx.moveTo(Math.floor(datum.scaledX), Math.floor(datum.scaledY));
+        ctx.lineTo(Math.floor(datum.scaledX), Math.floor(datum.stackTopY));
+        ctx.stroke();
+    }
+    if (config.useProgressiveRendering && typeof renderQueue !== "undefined") {
+        for (i = 0; i < cache.data.length * 2; i++) {
+            cache.queues.push(renderQueue(renderBar).rate(config.progressiveRenderingRate));
+            cache.queues.splice(cache.data.length);
+        }
+        cache.data.forEach(function(d, i) {
+            cache.queues[i](d.values);
+        });
+    } else {
+        cache.data.forEach(function(d, i) {
+            d.values.forEach(function(d) {
+                renderBar(d);
+            });
+        });
+    }
 };
