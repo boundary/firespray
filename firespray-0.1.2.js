@@ -30,7 +30,7 @@ firespray.chart = function module() {
     this.dispatch = dispatch;
     var exports = {
         render: function() {
-            firespray.setupContainers();
+            firespray.setupContainers(config, cache);
             firespray.setupScales(config, cache);
             firespray.setupAxisY(config, cache);
             firespray.setupAxisX(config, cache);
@@ -731,8 +731,6 @@ firespray.setupBrush = function(config, cache, dispatch) {
 };
 
 firespray.setupContainers = function(config, cache) {
-    var cache = this.cache;
-    var config = this.config;
     if (!config.container) {
         throw "A container is needed";
     }

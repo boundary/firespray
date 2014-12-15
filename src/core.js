@@ -38,7 +38,7 @@ firespray.chart = function module() {
 	var exports = {
 
 		render: function() {
-			firespray.setupContainers();
+			firespray.setupContainers(config, cache);
 			firespray.setupScales(config, cache);
 			firespray.setupAxisY(config, cache);
 			firespray.setupAxisX(config, cache);
