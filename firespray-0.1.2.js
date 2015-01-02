@@ -12,7 +12,7 @@ firespray.chart = function module() {
         axesSvg: null,
         geometryCanvas: null,
         geometrySVG: null,
-        scaleX: d3.time.scale(),
+        scaleX: d3.scale.linear(),
         scaleY: d3.scale.linear(),
         isMirror: null,
         axisXHeight: null,
@@ -22,7 +22,8 @@ firespray.chart = function module() {
         zoomedExtentX: null,
         theme: null,
         brush: null,
-        queues: []
+        queues: [],
+        biggestY: null
     };
     var dispatch = d3.dispatch("brushChange", "brushDragStart", "brushDragMove", "brushDragEnd", "geometryHover", "geometryOut", "geometryClick", "chartHover", "chartOut", "chartEnter");
     this.cache = cache;
@@ -44,11 +45,6 @@ firespray.chart = function module() {
                 return this;
             }
             cache.data = firespray.utils.cloneJSON(_newData);
-            cache.data.forEach(function(d) {
-                d.values.forEach(function(dB) {
-                    dB.x = new Date(dB.x);
-                });
-            });
             cache.data.sort(function(a, b) {
                 var x = a.values.length;
                 var y = b.values.length;
@@ -168,13 +164,14 @@ firespray.chart = function module() {
 };
 
 firespray.defaultConfig = {
+    scaleX: "time",
     width: 500,
     height: 300,
     margin: {
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0
+        top: 20,
+        right: 20,
+        bottom: 20,
+        left: 20
     },
     container: null,
     showTicksX: false,
@@ -183,14 +180,15 @@ firespray.defaultConfig = {
     useBrush: false,
     suggestedXTicks: 10,
     suggestedYTicks: null,
-    timeFormat: d3.time.format("%H:%M:%S"),
-    axisXHeight: 20,
+    tickFormatX: "%H:%M:%S",
+    axisXHeight: 50,
+    axisYWidth: 0,
     isMirror: null,
     dotSize: 4,
     suffix: "",
     stripeWidthInSample: 1,
     tickFormatY: null,
-    labelYOffset: 10,
+    labelYOffset: -10,
     axisYStartsAtZero: true,
     showStripes: true,
     geometryType: "line",
@@ -263,7 +261,7 @@ firespray.utils = {
         };
     },
     generateData: function(options) {
-        options.startEpoch = new Date().getTime();
+        options.startEpoch = new Date().setMilliseconds(0);
         var lineCount = options.lineCount || 5;
         return d3.range(lineCount).map(function(d, i) {
             return firespray.utils.generateDataLine(options, i);
@@ -401,7 +399,7 @@ firespray._hovering = {
             },
             cy: function(d, i) {
                 var scaledY = cache.isMirror && i >= cache.data.length && d.scaledY2 ? d.scaledY2 : d.scaledY;
-                return scaledY + config.margin.top;
+                return scaledY;
             }
         });
         hoveredDotsSelection.exit().remove();
@@ -481,7 +479,7 @@ firespray._hovering = {
 firespray.template = "<div>" + '<svg xmlns="http://www.w3.org/2000/svg" class="bg">' + '<g class="chart-group">' + '<g class="background"><rect class="panel-bg" /></g>' + '<g class="axis-y axis-y2"></g><g class="axis-y axis-y1"></g><rect class="axis-x-bg" /><g class="axis-x"></g>' + "</g>" + "</svg>" + '<canvas class="geometry"></canvas>' + '<svg xmlns="http://www.w3.org/2000/svg" class="geometry-svg"></svg>' + '<svg xmlns="http://www.w3.org/2000/svg" class="axes">' + '<g class="chart-group">' + '<g class="axis-x"></g><rect class="axis-y-bg" /><g class="axis-y axis-y2"></g><g class="axis-y axis-y1"></g>' + "</g>" + "</svg>" + '<svg xmlns="http://www.w3.org/2000/svg" class="interaction">' + '<g class="hover-group"><line class="hover-guide-x"/>' + '<rect class="hover-rect" width="100%" height="100%" pointer-events="all" fill="none"/></rect>' + '</g><g class="brush-group"></g>' + "</svg>" + "</div>";
 
 firespray.themes = {
-    "default": ".firespray-chart .axis-x-bg {fill: rgba(220, 220, 220, 1); }" + ".firespray-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}" + ".firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".firespray-chart .stripe { fill: none; }" + ".firespray-chart .stripe.even { fill: rgb(250, 250, 250); }" + ".firespray-chart .panel-bg { fill: white; }" + ".firespray-chart .axis-y line { stroke: #eee; }" + ".firespray-chart  text { font-size: 10px; fill: #aaa; }" + ".firespray-chart  .hovered-geometry, .hover-guide-x{ stroke: #555; }" + ".firespray-chart  .domain{ display: none}",
+    "default": ".firespray-chart .axis-x-bg {fill: white; }" + ".firespray-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}" + ".firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".firespray-chart .stripe { fill: none; }" + ".firespray-chart .stripe.even { fill: rgb(250, 250, 250); }" + ".firespray-chart .panel-bg { fill: white; }" + ".firespray-chart .axis-y line { stroke: #eee; }" + ".firespray-chart  text { font-size: 10px; fill: #aaa; }" + ".firespray-chart  .hovered-geometry, .hover-guide-x{ stroke: #555; }" + ".firespray-chart  .domain{ display: none}",
     dark: ".firespray-chart .axis-x-bg {fill: #222; }" + ".firespray-chart .axis-y-bg {fill: rgba(50, 50, 50, 0.5);}" + ".firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".firespray-chart .stripe { fill: #222; }" + ".firespray-chart .panel-bg { fill: #333; }" + ".firespray-chart .axis-y line { stroke: #111; }" + ".firespray-chart  text { font-size: 10px; fill: #aaa; }" + ".firespray-chart  .hovered-geometry, .hover-guide-x{ stroke: #555; }" + ".firespray-chart  .domain{ display: none}"
 };
 
@@ -498,8 +496,12 @@ firespray.setupScales = function(config, cache) {
     }
     function setupScaleY() {
         var extentY = firespray.convenience.computeExtent(cache.data, "y");
+        cache.biggestY = "y";
         if (cache.isMirror !== false && firespray.convenience.hasValidDataY2(cache)) {
             var extentY2 = firespray.convenience.computeExtent(cache.data, "y2");
+            if (extentY2[1] > extentY[1]) {
+                cache.biggestY = "y2";
+            }
             extentY = [ Math.min(extentY[0], extentY2[0]), Math.max(extentY[1], extentY2[1]) ];
         }
         if (cache.isMirror) {
@@ -540,11 +542,8 @@ firespray.setupAxisX = function(config, cache) {
     var axisX = d3.svg.axis().scale(cache.scaleX).orient("bottom").tickSize(cache.axisXHeight);
     var textH = 12;
     if (config.showLabelsX) {
-        if (typeof config.timeFormat === "function") {
-            axisX.tickFormat(function(d) {
-                return config.timeFormat(d);
-            });
-        }
+        var format = config.scaleX === "linear" ? d3.format(config.tickFormatX) : d3.time.format(config.tickFormatX);
+        axisX.tickFormat(format);
         axisXSelection.call(axisX);
         var textOffset = cache.axisXHeight / 2 + textH / 2;
         axisXSelection.selectAll("text").attr({
@@ -556,7 +555,7 @@ firespray.setupAxisX = function(config, cache) {
             axisXSelection.selectAll("line").remove();
         } else {
             axisXSelection.selectAll("line").attr({
-                y2: cache.axisXHeight / 2
+                y2: cache.axisXHeight / 3
             });
         }
         axisXSelection.select(".domain").style({
@@ -566,12 +565,13 @@ firespray.setupAxisX = function(config, cache) {
     if (config.showGridX) {
         var bgXSelection = cache.bgSvg.select(".axis-x");
         bgXSelection.attr({
-            transform: "translate(" + [ 0, cache.chartH - cache.axisXHeight ] + ")"
+            transform: "translate(" + [ 0, cache.chartH ] + ")"
         });
         bgXSelection.call(axisX);
         bgXSelection.selectAll("text").text(null);
         bgXSelection.selectAll("line").attr({
-            y1: -cache.chartH
+            y1: 0,
+            y2: -cache.chartH
         }).classed("grid-line x", true);
         bgXSelection.select(".domain").style({
             display: "none"
@@ -661,8 +661,7 @@ firespray.setupAxisY = function(config, cache) {
         var axisYBg = cache.axesSvg.select(".axis-y-bg");
         axisYBg.attr({
             width: axisYBgW,
-            height: cache.chartH,
-            y: config.margin.top
+            height: cache.chartH
         });
     }
     cache.axesSvg.select(".domain").style({
@@ -751,8 +750,14 @@ firespray.setupContainers = function(config, cache) {
             position: "absolute"
         });
     }
+    var scales = {
+        time: d3.time.scale(),
+        linear: d3.scale.linear()
+    };
+    cache.scaleX = scales[config.scaleX];
     cache.axisXHeight = !config.showAxisX || !config.showLabelsX ? 0 : config.axisXHeight;
-    cache.chartW = config.width - config.margin.right - config.margin.left;
+    cache.axisYWidth = !config.showAxisY || !config.showLabelsY ? 0 : config.axisYWidth;
+    cache.chartW = config.width - config.margin.right - config.margin.left - cache.axisYWidth;
     cache.chartH = config.height - config.margin.top - config.margin.bottom - cache.axisXHeight;
     cache.scaleX.range([ 0, cache.chartW ]);
     cache.bgSvg.style({
@@ -764,10 +769,14 @@ firespray.setupContainers = function(config, cache) {
     cache.axesSvg.style({
         height: config.height + "px",
         width: config.width + "px"
+    }).select(".chart-group").attr({
+        transform: "translate(" + [ config.margin.left + cache.axisYWidth, config.margin.top ] + ")"
     });
     cache.interactionSvg.style({
         height: config.height + "px",
         width: config.width + "px"
+    }).select(".hover-group").attr({
+        transform: "translate(" + [ config.margin.left + cache.axisYWidth, config.margin.top ] + ")"
     });
     cache.bgSvg.select(".panel-bg").attr({
         width: cache.chartW,
@@ -828,7 +837,7 @@ firespray._computeGeometryData = function(config, cache) {
     }
     var stackedValues = d3.zip.apply(null, cache.data.map(function(d, i) {
         return d.values.map(function(d, i) {
-            return d.y;
+            return d[cache.biggestY];
         });
     }));
     var stackedMaxValues;

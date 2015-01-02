@@ -104,7 +104,7 @@ firespray._hovering = {
 				cx: function (d) { return d.scaledX; },
 				cy: function (d, i) {
 					var scaledY = (cache.isMirror && i >= cache.data.length && d.scaledY2) ? d.scaledY2 : d.scaledY;
-					return scaledY + config.margin.top;
+					return scaledY;
 				}
 			});
 		hoveredDotsSelection.exit().remove();

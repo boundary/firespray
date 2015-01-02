@@ -47,7 +47,7 @@ firespray.utils = {
 		};
 	},
 	generateData: function(options){
-		options.startEpoch = new Date().getTime();
+		options.startEpoch = new Date().setMilliseconds(0);
 		var lineCount = options.lineCount || 5;
 		return d3.range(lineCount).map(function(d, i){
 			return firespray.utils.generateDataLine(options, i);

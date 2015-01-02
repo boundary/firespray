@@ -38,11 +38,13 @@ firespray.setupLineGeometry = function(config, cache){
 
 firespray._computeGeometryData = function(config, cache){
 
-	if (cache.isMirror) {cache.scaleY.range([cache.chartH / 2, 0]);}
+	if (cache.isMirror) {
+		cache.scaleY.range([cache.chartH / 2, 0]);
+	}
 	else {cache.scaleY.range([cache.chartH, 0]);}
 
 	var stackedValues = d3.zip.apply(null, cache.data.map(function(d, i){
-		return d.values.map(function(d, i){ return d.y; });
+		return d.values.map(function(d, i){ return d[cache.biggestY]; });
 	}));
 	var stackedMaxValues;
 

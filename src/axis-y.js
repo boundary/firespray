@@ -75,7 +75,7 @@ firespray.setupAxisY = function (config, cache){
 		var maxLabelW = findMaxLabelWidth(labels);
 		var axisYBgW = maxLabelW ? maxLabelW + config.labelYOffset : 0;
 		var axisYBg = cache.axesSvg.select('.axis-y-bg');
-		axisYBg.attr({width: axisYBgW, height: cache.chartH, y: config.margin.top});
+		axisYBg.attr({width: axisYBgW, height: cache.chartH});
 	}
 
 	cache.axesSvg.select('.domain').style({fill: 'none', stroke: 'none'});

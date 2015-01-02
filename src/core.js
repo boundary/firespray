@@ -13,7 +13,7 @@ firespray.chart = function module() {
 		axesSvg: null,
 		geometryCanvas: null,
 		geometrySVG: null,
-		scaleX: d3.time.scale(),
+		scaleX: d3.scale.linear(),
 		scaleY: d3.scale.linear(),
 		isMirror: null,
 		axisXHeight: null,
@@ -23,7 +23,8 @@ firespray.chart = function module() {
 		zoomedExtentX: null,
 		theme: null,
 		brush: null,
-		queues: []
+		queues: [],
+		biggestY: null
 	};
 
 	var dispatch = d3.dispatch('brushChange', 'brushDragStart', 'brushDragMove', 'brushDragEnd',
@@ -51,7 +52,7 @@ firespray.chart = function module() {
 		setData: function (_newData) {
 			if(!_newData || _newData.length === 0 || _newData[0].values.length === 0) {return this;}
 			cache.data = firespray.utils.cloneJSON(_newData);
-			cache.data.forEach(function(d){ d.values.forEach(function(dB){ dB.x = new Date(dB.x); }); });
+//			cache.data.forEach(function(d){ d.values.forEach(function(dB){ dB.x = new Date(dB.x); }); });
 			cache.data.sort(function(a, b){ // sort by data.values.length, useful for searching hovered dots by the longest dataset first
 				var x = a.values.length; var y = b.values.length;
 				return ((x > y) ? -1 : ((x < y) ? 1 : 0));

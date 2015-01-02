@@ -3,7 +3,20 @@
 <head lang="en">
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<script src="../lib/d3.js"></script>
-	<script src="../firespray-0.1.2.js"></script>
+	<!--<script src="../firespray-0.1.2.js"></script>-->
+	<script src="../lib/render-queue.js"></script>
+	<script src="../src/core.js"></script>
+	<script src="../src/default-config.js"></script>
+	<script src="../src/util.js"></script>
+	<script src="../src/hovering.js"></script>
+	<script src="../src/templates.js"></script>
+	<script src="../src/scales.js"></script>
+	<script src="../src/axis-x.js"></script>
+	<script src="../src/axis-y.js"></script>
+	<script src="../src/stripes.js"></script>
+	<script src="../src/brush.js"></script>
+	<script src="../src/containers.js"></script>
+	<script src="../src/geometries.js"></script>
 	<style>
 		.container{
 			float: left;
@@ -16,17 +29,10 @@
 </head>
 <body>
 
-<div class="container chart1"></div>
-<div class="container chart2"></div>
-<div class="container chart3"></div>
-<div class="container chart4"></div>
-<div class="container chart5"></div>
-<div class="container chart6"></div>
-<div class="container chart7"></div>
-
 <script>
 
-	var simpleData = [
+var testDatasets = {
+	simpleData : [
 		{
 			name: 'a',
 			color: 'skyblue',
@@ -36,9 +42,9 @@
 				{x: 1414291074000, y: 5}
 			]
 		}
-	];
+	],
 
-	var stackedData = [
+	stackedData : [
 		{
 			name: 'a',
 			color: 'skyblue',
@@ -57,9 +63,9 @@
 				{x: 1414291074000, y: 15}
 			]
 		}
-	];
+	],
 
-	var mirrorData = [
+	mirrorData : [
 		{
 			name: 'a',
 			color: 'skyblue',
@@ -69,9 +75,9 @@
 				{x: 1414291074000, y: 5, y2: 2}
 			]
 		}
-	];
+	],
 
-	var data10Sec = [
+	data10Sec : [
 		{
 			name: 'a',
 			color: 'skyblue',
@@ -83,9 +89,9 @@
 				{x: 1414291110000, y: 1}
 			]
 		}
-	];
+	],
 
-	var dataUnequal = [
+	dataUnequal : [
 		{
 			name: 'a',
 			color: 'skyblue',
@@ -97,9 +103,9 @@
 				{x: 1414291079000, y: 1}
 			]
 		}
-	];
+	],
 
-	var subsecondData = [
+	subsecondData : [
 		{
 			name: 'a',
 			color: 'skyblue',
@@ -109,103 +115,72 @@
 				{x: 1414291074333, y: 5}
 			]
 		}
-	];
+	],
 
-	var dayInMillis = +24*60*60*1000;
-	var dataDays = [
+	dataDays : [
 		{
 			name: 'a',
 			color: 'skyblue',
 			values: [
 				{x: 1414291071000, y: 10},
-				{x: 1414291071000 + dayInMillis, y: 1},
-				{x: 1414291071000 + dayInMillis*2, y: 1},
-				{x: 1414291071000 + dayInMillis*3, y: 1},
-				{x: 1414291071000 + dayInMillis*4, y: 1}
+				{x: 1414291071000 + 86400000, y: 1},
+				{x: 1414291071000 + 86400000*2, y: 1},
+				{x: 1414291071000 + 86400000*3, y: 1},
+				{x: 1414291071000 + 86400000*4, y: 1}
 			]
 		}
-	];
+	],
 
-	var dataLong = [
+	dataLong : [
 		{
 			name: 'a',
 			color: 'skyblue',
 			values: d3.range(100).map(function(d, i){ return {x: 1414291071000 + 1000*i, y: 10 * (i%2) + 10}; })
 		}
-	];
+	],
 
-	var chart1 = firespray.chart()
-		.setConfig({
-			container: document.querySelector('.chart1'),
-			width: 400,
-			height: 250,
-			theme: 'default',
-			geometryType: 'line'
-//        	geometryType: 'bar'
-		})
-		.setData(simpleData);
+	numericalXData : [
+		{
+			name: 'a',
+			color: 'skyblue',
+			values: d3.range(100).map(function(d, i){ return {x: i*100, y: Math.random()*100}; })
+		},
+		{
+			name: 'b',
+			color: 'orange',
+			values: d3.range(100).map(function(d, i){ return {x: i*100, y: Math.random()*100}; })
+		}
+	]
+};
 
-	var chart2 = firespray.chart()
-		.setConfig({
-			container: document.querySelector('.chart2'),
-			width: 400,
-			height: 250,
-			theme: 'default',
-        	geometryType: 'stackedArea'
-//        	geometryType: 'stackedBar'
-//        	geometryType: 'percentBar'
-		})
-		.setData(stackedData);
 
-	var chart3 = firespray.chart()
-		.setConfig({
-			container: document.querySelector('.chart3'),
-			width: 400,
-			height: 250,
-			theme: 'default',
-			geometryType: 'line'
-		})
-		.setData(mirrorData);
+var commonConfig = {
+	width: 400,
+	height: 250,
+	geometryType: 'line',
+	theme: 'default'
+};
 
-	var chart4 = firespray.chart()
-		.setConfig({
-			container: document.querySelector('.chart4'),
-			width: 400,
-			height: 250,
-			theme: 'default',
-			geometryType: 'line'
-		})
-		.setData(data10Sec);
+var specificConfig = {
+	numericalXData: {
+		scaleX: 'linear',
+		tickFormatX: 's'
+	}
+};
 
-	var chart5 = firespray.chart()
+var chart;
+for(var dataset in testDatasets){
+	chart = firespray.chart()
 		.setConfig({
-			container: document.querySelector('.chart5'),
-			width: 400,
-			height: 250,
-			theme: 'default',
-			geometryType: 'line'
+			container: d3.select('body').append('div').classed('container', true).node()
 		})
-		.setData(dataUnequal);
+		.setConfig(commonConfig);
 
-	var chart6 = firespray.chart()
-		.setConfig({
-			container: document.querySelector('.chart6'),
-			width: 400,
-			height: 250,
-			theme: 'default',
-			geometryType: 'line'
-		})
-		.setData(dataDays);
-
-	var chart7 = firespray.chart()
-		.setConfig({
-			container: document.querySelector('.chart7'),
-			width: 400,
-			height: 250,
-			theme: 'default',
-			geometryType: 'line'
-		})
-		.setData(subsecondData);
+	if(specificConfig[dataset]){
+		chart.setConfig(specificConfig[dataset]);
+	}
+	chart.setData(testDatasets[dataset]);
+}
 
 </script>
 </body>

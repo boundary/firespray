@@ -22,7 +22,7 @@ firespray.template = '<div>' +
 	'</div>';
 
 firespray.themes = {
-	default: '.firespray-chart .axis-x-bg {fill: rgba(220, 220, 220, 1); }' +
+	default: '.firespray-chart .axis-x-bg {fill: white; }' +
 	'.firespray-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}' +
 	'.firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }' +
 	'.firespray-chart .stripe { fill: none; }' +

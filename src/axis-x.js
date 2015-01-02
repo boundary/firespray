@@ -14,9 +14,8 @@ firespray.setupAxisX = function(config, cache) {
 	// labels
 	var textH = 12;
 	if(config.showLabelsX){
-		if (typeof config.timeFormat === 'function') {
-			axisX.tickFormat(function (d) { return config.timeFormat(d); });
-		}
+		var format = (config.scaleX === 'linear')? d3.format(config.tickFormatX): d3.time.format(config.tickFormatX);
+		axisX.tickFormat(format);
 
 		axisXSelection.call(axisX);
 		var textOffset = cache.axisXHeight/2 + textH/2;
@@ -28,7 +27,7 @@ firespray.setupAxisX = function(config, cache) {
 			axisXSelection.selectAll('line').remove();
 		}
 		else{
-			axisXSelection.selectAll('line').attr({y2: cache.axisXHeight/2});
+			axisXSelection.selectAll('line').attr({y2: cache.axisXHeight/3});
 		}
 
 		axisXSelection.select('.domain').style({display: 'none'});
@@ -37,10 +36,10 @@ firespray.setupAxisX = function(config, cache) {
 	// ticks
 	if(config.showGridX){
 		var bgXSelection = cache.bgSvg.select('.axis-x');
-		bgXSelection.attr({transform: 'translate(' + [0, cache.chartH - cache.axisXHeight] + ')'});
+		bgXSelection.attr({transform: 'translate(' + [0, cache.chartH] + ')'});
 		bgXSelection.call(axisX);
 		bgXSelection.selectAll('text').text(null);
-		bgXSelection.selectAll('line').attr({y1: -cache.chartH})
+		bgXSelection.selectAll('line').attr({y1: 0, y2: -cache.chartH})
 			.classed('grid-line x', true);
 
 		bgXSelection.select('.domain').style({display: 'none'});

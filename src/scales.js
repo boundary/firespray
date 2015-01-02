@@ -16,8 +16,10 @@ firespray.setupScales = function(config, cache){
 	function setupScaleY(){
 		var extentY = firespray.convenience.computeExtent(cache.data, 'y');
 
+		cache.biggestY = 'y';
 		if(cache.isMirror !== false && firespray.convenience.hasValidDataY2(cache)) {
 			var extentY2 = firespray.convenience.computeExtent(cache.data, 'y2');
+			if((extentY2[1] > extentY[1])) {cache.biggestY = 'y2';}
 			extentY = [Math.min(extentY[0], extentY2[0]), Math.max(extentY[1], extentY2[1])];
 		}
 
@@ -40,6 +42,5 @@ firespray.setupScales = function(config, cache){
 			cache.extentY = config.axisYStartsAtZero ? [0, extentY[1]] : extentY ;
 			cache.scaleY.domain(cache.extentY);
 		}
-
 	}
 };

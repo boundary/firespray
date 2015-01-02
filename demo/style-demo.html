@@ -25,7 +25,7 @@
 	.axis-x-bg {fill: white;}
 	.axis-y-bg {fill: rgba(220, 220, 220, 0.5);}
 	.extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }
-	.stripe { fill: none; }
+	.stripe { fill: #eee; }
 	.stripe.even { fill: silver; }
 	.panel-bg { fill: white; }
 	.axis-y line { stroke: #eee; }
@@ -37,9 +37,12 @@
 	.bg .axis-x line{
 		stroke: #eee;
 	}
+	#chart{
+		padding: 10px;
+	}
 </script>
 
-<div id="chart1" class="container"></div>
+<div id="chart" class="container"></div>
 
 <script>
 
@@ -56,9 +59,19 @@
 //		}
 //	];
 
+var data = [{
+	name: 'a',
+	color: 'orange',
+	values: [
+		{x: 1414291072000, y: 10, y2: 15},
+		{x: 1414291073000, y: 1, y2: 0},
+		{x: 1414291074000, y: 5, y2: 2}
+	]
+}];
+
 	firespray.chart()
 		.setConfig({
-			container: document.querySelector('#chart1'),
+			container: document.querySelector('#chart'),
 			width: 600,
 			height: 400,
 			showGridX: true,
