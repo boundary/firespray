@@ -133,7 +133,7 @@ firespray.chart = function module() {
 
 		getDataExtent: function () {
 			if(cache.extentX && cache.extentX) {
-				return {x: cache.extentX.map(function(d){ return d.getTime(); }), y:cache.extentY};
+				return {x: cache.extentX.map(function(d){ return d; }), y:cache.extentY};
 			}
 		},
 

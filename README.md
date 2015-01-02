@@ -27,7 +27,7 @@ Streaming charts library developed by [Boundary](http://boundary.com/)
 
 ## Optimized for large datasets
 
-#### Progressive rendering using [render-queue](http://bl.ocks.org/syntagmatic/raw/3341641/)
+#### Progressive rendering using [render-slicer](https://github.com/biovisualize/render-slicer)
 <img src="img/progressive_rendering.png" style="width:500px"/>
 <br /><br />
 

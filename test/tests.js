@@ -14,8 +14,8 @@ describe('Firespray', function() {
 			name: 'Data 1',
 			color: 'red',
 			values: [
-				{x: 'Thu Oct 23 2014 09:28:40 GMT-0400 (EDT)', y: 1},
-				{x: 'Thu Oct 23 2014 09:28:50 GMT-0400 (EDT)', y: 2}
+				{x: 1414070920000, y: 1},
+				{x: 1414070930000, y: 2}
 			]
 		}
 	];
@@ -86,11 +86,11 @@ describe('Firespray', function() {
 		it('re-render on data change', function() {
 			addChart(null, minimalData);
 			var secondDataset = firespray.utils.cloneJSON(minimalData);
-			secondDataset[0].values[0].x = 'Thu Oct 23 2014 09:28:30 GMT-0400 (EDT)';
+			secondDataset[0].values[0].x = 1414070910000;
 
-			expect(chart.getDataExtent().x[0]).to.equal(new Date('Thu Oct 23 2014 09:28:40 GMT-0400 (EDT)').getTime());
+			expect(chart.getDataExtent().x[0]).to.equal(1414070920000);
 			chart.setData(secondDataset);
-			expect(chart.getDataExtent().x[0]).to.equal(new Date('Thu Oct 23 2014 09:28:30 GMT-0400 (EDT)').getTime());
+			expect(chart.getDataExtent().x[0]).to.equal(1414070910000);
 
 			removeChart();
 		});
@@ -111,8 +111,8 @@ describe('Firespray', function() {
 		it('gets data extent', function() {
 			addChart(null, minimalData);
 
-			expect(chart.getDataExtent().x[0]).to.equal(new Date('Thu Oct 23 2014 09:28:40 GMT-0400 (EDT)').getTime());
-			expect(chart.getDataExtent().x[1]).to.equal(new Date('Thu Oct 23 2014 09:28:50 GMT-0400 (EDT)').getTime());
+			expect(chart.getDataExtent().x[0]).to.equal(1414070920000);
+			expect(chart.getDataExtent().x[1]).to.equal(1414070930000);
 
 			removeChart();
 		});
@@ -127,7 +127,7 @@ describe('Firespray', function() {
 
 				var firstLineData = d[0];
 				expect(firstLineData.name).to.equal('Data 1');
-				expect(d[0].closestValue.x.getTime()).to.equal(new Date('Thu Oct 23 2014 09:28:40 GMT-0400 (EDT)').getTime());
+				expect(d[0].closestValue.x).to.equal(1414070920000);
 				expect(d[0].closestValue.y).to.equal(1);
 
 				removeChart();

@@ -25,14 +25,14 @@
 	.axis-x-bg {fill: white;}
 	.axis-y-bg {fill: rgba(220, 220, 220, 0.5);}
 	.extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }
-	.stripe { fill: #eee; }
-	.stripe.even { fill: silver; }
+	.stripe { fill: rgba(250, 250, 250, 1); }
+	.stripe.even { fill: white; }
 	.panel-bg { fill: white; }
 	.axis-y line { stroke: #eee; }
 	text { font-size: 10px; fill: #aaa; }
 	.hovered-geometry, .hover-guide-x{ stroke: #555; }
 	.axes .axis-x line{
-		stroke: silver;
+		stroke: #eee;
 	}
 	.bg .axis-x line{
 		stroke: #eee;
@@ -46,37 +46,17 @@
 
 <script>
 
-	var data = firespray.utils.generateData({pointCount: 5, lineCount: 1});
-//	var data = [
-//		{
-//			name: 'a',
-//			color: 'orange',
-//			values: [
-//				{x: 1414291072000, y: 10},
-//				{x: 1414291073000, y: 1},
-//				{x: 1414291074000, y: 5}
-//			]
-//		}
-//	];
-
-var data = [{
-	name: 'a',
-	color: 'orange',
-	values: [
-		{x: 1414291072000, y: 10, y2: 15},
-		{x: 1414291073000, y: 1, y2: 0},
-		{x: 1414291074000, y: 5, y2: 2}
-	]
-}];
+	var data = firespray.utils.generateData({pointCount: 20, lineCount: 5});
 
 	firespray.chart()
 		.setConfig({
 			container: document.querySelector('#chart'),
-			width: 600,
+			width: 800,
 			height: 400,
 			showGridX: true,
 			showTicksX: true,
-        	geometryType: 'line'
+        	geometryType: 'line',
+			tickFormatX: '%M:%S'
 		}).setData(data);
 
 	var style = document.head.querySelector('style');

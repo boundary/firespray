@@ -128,7 +128,7 @@ firespray.chart = function module() {
             if (cache.extentX && cache.extentX) {
                 return {
                     x: cache.extentX.map(function(d) {
-                        return d.getTime();
+                        return d;
                     }),
                     y: cache.extentY
                 };
