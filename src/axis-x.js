@@ -1,9 +1,8 @@
 // X axis
 ///////////////////////////////////////////////////////////
 firespray.setupAxisX = function(config, cache) {
-	if(!firespray.convenience.hasValidData(cache)) {return;}
 
-	if(!config.showAxisX) {return this;}
+	if(!config.showAxisX) {return cache;}
 
 	// X axis
 	/////////////////////////////
@@ -44,4 +43,6 @@ firespray.setupAxisX = function(config, cache) {
 
 		bgXSelection.select('.domain').style({display: 'none'});
 	}
+
+	return cache;
 };

@@ -1,12 +1,12 @@
 // Brush
 ///////////////////////////////////////////////////////////
-firespray.setupBrush = function(config, cache, dispatch){
-	if(!config.useBrush || cache.brush) {return this;}
+firespray.setupBrush = function(config, cache){
+	if(!config.useBrush || cache.brush) {return cache;}
 
 	cache.brush = d3.svg.brush();
 
-	var brushChange = firespray.utils.throttle(dispatch.brushChange, config.brushThrottleWaitDuration);
-	var brushDragMove = firespray.utils.throttle(dispatch.brushDragMove, config.brushThrottleWaitDuration);
+	var brushChange = firespray.utils.throttle(cache.dispatch.brushChange, config.brushThrottleWaitDuration);
+	var brushDragMove = firespray.utils.throttle(cache.dispatch.brushDragMove, config.brushThrottleWaitDuration);
 
 	cache.brushExtent = cache.brushExtent || cache.scaleX.domain();
 	cache.brush.x(cache.scaleX)
@@ -17,10 +17,12 @@ firespray.setupBrush = function(config, cache, dispatch){
 			cache.brushExtent = cache.brush.extent();
 			brushDragMove.call(this, cache.brushExtent.map(function(d){ return d.getTime(); }));
 		})
-		.on("brushstart", function(){ dispatch.brushDragStart.call(this, cache.brushExtent.map(function(d){ return d.getTime(); })); })
-		.on("brushend", function(){ dispatch.brushDragEnd.call(this, cache.brushExtent.map(function(d){ return d.getTime(); })); });
+		.on("brushstart", function(){ cache.dispatch.brushDragStart.call(this, cache.brushExtent.map(function(d){ return d.getTime(); })); })
+		.on("brushend", function(){ cache.dispatch.brushDragEnd.call(this, cache.brushExtent.map(function(d){ return d.getTime(); })); });
 	cache.interactionSvg.select('.brush-group')
 		.call(cache.brush)
 		.selectAll('rect')
 		.attr({height: cache.chartH + cache.axisXHeight, y: 0});
+
+	return cache;
 };

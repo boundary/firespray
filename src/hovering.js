@@ -1,8 +1,8 @@
 // Hovering
 ///////////////////////////////////////////////////////////
-firespray.setupHovering = function(config, cache, dispatch) {
+firespray.setupHovering = function(config, cache) {
 
-	if(config.useBrush) {return this;}
+	if(config.useBrush) {return cache;}
 	var that = this;
 
 	cache.interactionSvg.select('.hover-rect')
@@ -12,8 +12,8 @@ firespray.setupHovering = function(config, cache, dispatch) {
 			var closestPointsScaledX = firespray._hovering.injectClosestPointsFromX(mouseX, config, cache);
 			cache.interactionSvg.select('.hover-group').style({visibility: 'visible'});
 			if (typeof closestPointsScaledX !== 'undefined') {
-				firespray._hovering.displayHoveredGeometry(config, cache, dispatch);
-				dispatch.chartHover.call(that, cache.data);
+				firespray._hovering.displayHoveredGeometry(config, cache);
+				cache.dispatch.chartHover.call(that, cache.data);
 				firespray._hovering.displayVerticalGuide(closestPointsScaledX, config, cache);
 			}
 			else {
@@ -21,17 +21,19 @@ firespray.setupHovering = function(config, cache, dispatch) {
 				firespray._hovering.displayVerticalGuide(mouseX, config, cache);
 			}
 		})
-		.on('mouseenter', function(){ dispatch.chartEnter.call(that); })
+		.on('mouseenter', function(){ cache.dispatch.chartEnter.call(that); })
 		.on('mouseout', function () {
 			var svg = cache.interactionSvg.node();
 			var target = d3.event.relatedTarget;
 			if((svg.contains && !svg.contains(target)) ||
 				(svg.compareDocumentPosition && !svg.compareDocumentPosition(target))) {
 				cache.interactionSvg.select('.hover-group').style({visibility: 'hidden'});
-				dispatch.chartOut.call(that);
+				cache.dispatch.chartOut.call(that);
 			}
 		})
 		.select('.hover-group');
+
+	return cache;
 };
 
 firespray._hovering = {
@@ -55,14 +57,14 @@ firespray._hovering = {
 		return closestScaledX;
 	},
 
-	displayHoveredGeometry: function(config, cache, dispatch){
+	displayHoveredGeometry: function(config, cache){
 		if(config.geometryType === 'bar' ||
 			config.geometryType === 'percentBar' ||
-			config.geometryType === 'stackedBar') {firespray._hovering.displayHoveredRects(config, cache, dispatch);}
-		else {firespray._hovering.displayHoveredDots(config, cache, dispatch);}
+			config.geometryType === 'stackedBar') {firespray._hovering.displayHoveredRects(config, cache);}
+		else {firespray._hovering.displayHoveredDots(config, cache);}
 	},
 
-	displayHoveredDots: function(config, cache, dispatch) {
+	displayHoveredDots: function(config, cache) {
 
 		var hoverData = cache.data.map(function(d){ return d.closestValue; });
 		if (cache.isMirror) {
@@ -90,10 +92,10 @@ firespray._hovering = {
 					valueY: valueY,
 					containerTop: containerTop
 				};
-				dispatch.geometryHover.call(this, e, d);
+				cache.dispatch.geometryHover.call(this, e, d);
 			})
-			.on('mouseout', function(){ dispatch.geometryOut.call(this); })
-			.on('click', function(){ dispatch.geometryClick.call(this); });
+			.on('mouseout', function(){ cache.dispatch.geometryOut.call(this); })
+			.on('click', function(){ cache.dispatch.geometryClick.call(this); });
 		hoveredDotsSelection
 			.filter(function(d, i){ return typeof d !== 'undefined' && !isNaN(d.y); })
 			.style({
@@ -111,7 +113,7 @@ firespray._hovering = {
 		return this;
 	},
 
-	displayHoveredRects: function(config, cache, dispatch) {
+	displayHoveredRects: function(config, cache) {
 
 		var hoverData = cache.data.map(function(d){ return d.closestValue; });
 		if (cache.isMirror) {
@@ -139,10 +141,10 @@ firespray._hovering = {
 					valueY: valueY,
 					containerTop: containerTop
 				};
-				dispatch.geometryHover.call(this, e, d);
+				cache.dispatch.geometryHover.call(this, e, d);
 			})
-			.on('mouseout', function(){ dispatch.geometryOut.call(this); })
-			.on('click', function(){ dispatch.geometryClick.call(this); });
+			.on('mouseout', function(){ cache.dispatch.geometryOut.call(this); })
+			.on('click', function(){ cache.dispatch.geometryClick.call(this); });
 		hoveredDotsSelection
 			.filter(function(d, i){ return typeof d !== 'undefined' && !isNaN(d.y); })
 			.style({

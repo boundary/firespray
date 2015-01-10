@@ -20,4 +20,6 @@ firespray.setupStripes = function(config, cache){
 		.classed('even', function(d, i){ return i%2 === 0; })
 		.style({stroke: 'none'});
 	stripesSelection.exit().remove();
+
+	return cache;
 };

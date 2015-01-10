@@ -1,6 +1,7 @@
 // Containers
 ///////////////////////////////////////////////////////////
 firespray.setupContainers = function(config, cache){
+
 	if(!config.container){
 		throw 'A container is needed';
 	}
@@ -47,7 +48,7 @@ firespray.setupContainers = function(config, cache){
 	cache.bgSvg.select('.axis-x-bg').attr({width: cache.chartW, height: cache.axisXHeight, y: cache.chartH});
 
 	if(config.geometryType === 'line'){
-		cache.isMirror = (typeof config.isMirror === 'boolean') ? config.isMirror : this.convenience.hasValidDataY2(cache);
+		cache.isMirror = (typeof config.isMirror === 'boolean') ? config.isMirror : firespray.convenience.hasValidDataY2(cache);
 	}
 	else{ cache.isMirror = false; }
 
@@ -56,4 +57,6 @@ firespray.setupContainers = function(config, cache){
 		cache.root.append('style').html(firespray.themes[config.theme]);
 		cache.theme = config.theme;
 	}
+
+	return cache;
 };

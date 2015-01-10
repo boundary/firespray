@@ -1,7 +1,6 @@
 // Scales
 ///////////////////////////////////////////////////////////
 firespray.setupScales = function(config, cache){
-	if(!firespray.convenience.hasValidData(cache)) {return;}
 
 	setupScaleX();
 	setupScaleY();
@@ -43,4 +42,6 @@ firespray.setupScales = function(config, cache){
 			cache.scaleY.domain(cache.extentY);
 		}
 	}
+
+	return cache;
 };

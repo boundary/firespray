@@ -25,6 +25,15 @@ firespray.utils = {
 		}
 		return destination;
 	},
+	pipeline: function () {
+		var fns = arguments;
+		return function (config, cache) {
+			for (var i = 0; i < fns.length; i++) {
+				cache = fns[i].call(this, config, cache);
+			}
+			return cache;
+		};
+	},
 	generateDataPoint: function(options, i){
 		var point = {
 				x: options.epoch,

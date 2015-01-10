@@ -1,9 +1,8 @@
 // Y axis
 ///////////////////////////////////////////////////////////
 firespray.setupAxisY = function (config, cache){
-	if(!firespray.convenience.hasValidData(cache)) {return;}
 
-	if(!config.showAxisY) {return this;}
+	if(!config.showAxisY) {return cache;}
 
 	// Y axis
 	if (cache.isMirror) {cache.scaleY.range([cache.chartH / 2, 0]);}
@@ -80,4 +79,5 @@ firespray.setupAxisY = function (config, cache){
 
 	cache.axesSvg.select('.domain').style({fill: 'none', stroke: 'none'});
 
+	return cache;
 };

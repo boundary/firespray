@@ -3,8 +3,6 @@
 
 firespray.setupGeometries = function(config, cache){
 
-	if(!firespray.convenience.hasValidData(cache)) {return;} //TODO get rid of these checks
-
 	firespray._computeGeometryData(config, cache);
 
 	if(config.geometryType === 'line' ||
@@ -13,6 +11,8 @@ firespray.setupGeometries = function(config, cache){
 	else if(config.geometryType === 'bar' ||
 		config.geometryType === 'percentBar' ||
 		config.geometryType === 'stackedBar') {firespray.setupBarGeometry(config, cache);}
+
+	return cache;
 };
 
 firespray.setupBarGeometry = function(config, cache){

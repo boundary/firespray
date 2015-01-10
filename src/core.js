@@ -27,26 +27,26 @@ firespray.chart = function module() {
 		biggestY: null
 	};
 
-	var dispatch = d3.dispatch('brushChange', 'brushDragStart', 'brushDragMove', 'brushDragEnd',
+	cache.dispatch = d3.dispatch('brushChange', 'brushDragStart', 'brushDragMove', 'brushDragEnd',
 		'geometryHover', 'geometryOut', 'geometryClick', 'chartHover', 'chartOut', 'chartEnter');
 
-	this.cache = cache;
-	this.config = config;
-	this.dispatch = dispatch;
+	var pipeline = firespray.utils.pipeline(
+		firespray.setupContainers,
+		firespray.setupScales,
+		firespray.setupAxisY,
+		firespray.setupAxisX,
+		firespray.setupBrush,
+		firespray.setupHovering,
+		firespray.setupStripes,
+		firespray.setupGeometries
+	);
 
 	// Public methods
 	///////////////////////////////////////////////////////////
 	var exports = {
 
 		render: function() {
-			firespray.setupContainers(config, cache);
-			firespray.setupScales(config, cache);
-			firespray.setupAxisY(config, cache);
-			firespray.setupAxisX(config, cache);
-			firespray.setupBrush(config, cache, dispatch);
-			firespray.setupHovering(config, cache, dispatch);
-			firespray.setupStripes(config, cache);
-			firespray.setupGeometries(config, cache);
+			pipeline(config, cache);
 		},
 
 		setData: function (_newData) {
@@ -75,12 +75,8 @@ firespray.chart = function module() {
 		getDataSlice: function(_sliceExtentX){
 			var dataSlice = firespray.utils.cloneJSON(cache.data)
 				.map(function(d){
-					d.values = d.values.map(function(dB){
-							dB.x = new Date(dB.x);
-							return dB;
-						})
-						.filter(function(dB){
-							return dB.x.getTime() >= _sliceExtentX[0] && dB.x.getTime() <= _sliceExtentX[1];
+					d.values = d.values.filter(function(dB){
+							return dB.x >= _sliceExtentX[0] && dB.x <= _sliceExtentX[1];
 						});
 					return d;
 				});
@@ -92,14 +88,14 @@ firespray.chart = function module() {
 		},
 
 		setZoom: function (_newExtent) {
-			config.zoomedExtentX = _newExtent.map(function (d) { return new Date(d); });
+			config.zoomedExtentX = _newExtent;
 			this.render();
 			return this;
 		},
 
 		setBrushSelection: function (_brushSelectionExtent) {
 			if (cache.brush) {
-				cache.brushExtent = _brushSelectionExtent.map(function (d) { return new Date(d); });
+				cache.brushExtent = _brushSelectionExtent;
 				this.render();
 			}
 			return this;
@@ -112,11 +108,11 @@ firespray.chart = function module() {
 			var closestPointsScaledX = firespray._hovering.injectClosestPointsFromX(hoverPosX, config, cache);
 			cache.interactionSvg.select('.hover-group').style({visibility: 'visible'});
 			if (typeof closestPointsScaledX !== 'undefined') {
-				firespray._hovering.displayHoveredGeometry(config, cache, dispatch);
+				firespray._hovering.displayHoveredGeometry(config, cache);
 				firespray._hovering.displayVerticalGuide(closestPointsScaledX, config, cache);
 			}
 			else {
-				firespray._hovering.hideHoveredGeometry(config, cache, dispatch);
+				firespray._hovering.hideHoveredGeometry(config, cache);
 				firespray._hovering.displayVerticalGuide(hoverPosX, config, cache);
 			}
 
@@ -159,7 +155,7 @@ firespray.chart = function module() {
 		}
 	};
 
-	d3.rebind(exports, dispatch, "on");
+	d3.rebind(exports, cache.dispatch, "on");
 
 	return exports;
 };
