@@ -5,13 +5,13 @@
 	<script src="../lib/d3.js"></script>
 	<script src="../firespray-0.1.2.js"></script>
 	<style>
-		.firespray-chart .axis-x-bg {fill: rgba(220, 220, 220, 1); }
-		.firespray-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}
-		.firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }
-		.firespray-chart .stripe { fill: orange; }
-		.firespray-chart .stripe.even { fill: rgb(250, 250, 250); }
-		.firespray-chart .panel-bg { fill: white; }
-		.firespray-chart .axis-y line { stroke: #eee; }
+		body { background-color: #222; }
+		.firespray-chart .axis-x-bg { fill: none; }
+		.firespray-chart .axis-y-bg { fill: #444; }
+		.firespray-chart .stripe { fill: #303030; }
+		.firespray-chart .stripe.even { fill: none; }
+		.firespray-chart .panel-bg { fill: #333; }
+		.firespray-chart .axis-y line { stroke: #444; }
 		text { font-size: 10px; fill: #aaa; }
 	</style>
 </head>
@@ -21,80 +21,23 @@
 
 <script>
 
-	var simpleData = [
+	var data = [
 		{
 			name: 'a',
 			color: 'skyblue',
-			values: [
-				{x: 1414291072000, y: 10},
-				{x: 1414291073000, y: 1},
-				{x: 1414291074000, y: 5}
-			]
+			values: d3.range(100).map(function(d, i){ return {x: 1414291081000 + 1000*i, y: 10 * (i%2) + 10}; })
 		}
 	];
 
-	var data10Sec = [
-		{
-			name: 'a',
-			color: 'skyblue',
-			values: [
-				{x: 1414291070000, y: 10},
-				{x: 1414291080000, y: 1},
-				{x: 1414291090000, y: 5},
-				{x: 1414291100000, y: 1},
-				{x: 1414291110000, y: 1}
-			]
-		}
-	];
-
-	var dataUnequal = [
-		{
-			name: 'a',
-			color: 'skyblue',
-			values: [
-				{x: 1414291071000, y: 10},
-				{x: 1414291072000, y: 1},
-				{x: 1414291074000, y: 5},
-				{x: 1414291078000, y: 1},
-				{x: 1414291079000, y: 1}
-			]
-		}
-	];
-
-	var dayInMillis = +24*60*60*1000;
-	var dataDays = [
-		{
-			name: 'a',
-			color: 'skyblue',
-		values: [
-				{x: 1414291071000, y: 10},
-				{x: 1414291071000 + dayInMillis, y: 1},
-				{x: 1414291071000 + dayInMillis*2, y: 1},
-				{x: 1414291071000 + dayInMillis*3, y: 1},
-				{x: 1414291071000 + dayInMillis*4, y: 1}
-			]
-		}
-	];
-
-	var dataLong = [
-		{
-			name: 'a',
-			color: 'skyblue',
-			values: d3.range(100).map(function(d, i){ return {x: 1414291071000 + 1000*i, y: 10 * (i%2) + 10}; })
-		}
-	];
-
-	var data = dataLong;
+	var data = firespray.utils.generateData({pointCount: 30, lineCount: 5});
 
 	var chart = firespray.chart()
 		.setConfig({
 			container: document.querySelector('.chart1'),
 			width: 600,
 			height: 400,
-//			theme: 'default',
-//			resolution: 'hour',
-//			geometryType: 'bar'
-			stripeWidthInSample: 10,
+			renderer: 'svg',
+			stripeWidthInSample: 1,
 			geometryType: 'line'
 		})
 		.setData(data);

@@ -22,6 +22,17 @@
 <body>
 
 <script type="style" id="style1">
+	body { background-color: #222; }
+	.firespray-chart .axis-x-bg { fill: none; }
+	.firespray-chart .axis-y-bg { fill: #444; }
+	.firespray-chart .stripe { fill: #303030; }
+	.firespray-chart .stripe.even { fill: none; }
+	.firespray-chart .panel-bg { fill: #333; }
+	.firespray-chart .axis-y line { stroke: #444; }
+	text { font-size: 10px; fill: #aaa; }
+</script>
+
+<script type="style" id="style2">
 	.axis-x-bg {fill: white;}
 	.axis-y-bg {fill: rgba(220, 220, 220, 0.5);}
 	.extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }
@@ -31,16 +42,15 @@
 	.axis-y line { stroke: #eee; }
 	text { font-size: 10px; fill: #aaa; }
 	.hovered-geometry, .hover-guide-x{ stroke: #555; }
-	.axes .axis-x line{
-		stroke: #eee;
-	}
-	.bg .axis-x line{
-		stroke: #eee;
-	}
-	#chart{
-		padding: 10px;
-	}
+	.axes .axis-x line { stroke: #eee; }
+	.bg .axis-x line { stroke: #eee; }
+	#chart { padding: 10px; }
 </script>
+
+<select id="styles">
+	<option value="style1">Dark</option>
+	<option value="style2">Light</option>
+</select>
 
 <div id="chart" class="container"></div>
 
@@ -61,10 +71,14 @@
 
 	var style = document.head.querySelector('style');
 	function setStyle(selector){
-		style.innerHTML = document.querySelector(selector).innerText;
+		style.innerHTML = document.querySelector('#' + selector).innerText;
 	}
 
-	setStyle('#style1');
+	document.querySelector('#styles').onchange = function(e){
+		setStyle(e.target.value);
+	};
+
+	setStyle('style1');
 
 </script>
 </body>
