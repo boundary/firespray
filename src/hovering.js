@@ -5,10 +5,26 @@ firespray.setupHovering = function(config, cache) {
 	if(config.useBrush) {return cache;}
 	var that = this;
 
+	var mouseIsPressed = false;
+	document.onmousedown = function() {
+		mouseIsPressed = true;
+	};
+	document.onmouseup = function() {
+		mouseIsPressed = false;
+	};
+	d3.select(document).on('mousewheel', function(){
+		cache.dispatch.mouseWheelScroll.call(that, d3.event.wheelDelta);
+	});
+
 	cache.interactionSvg.select('.hover-rect')
 		.on('mousemove', function () {
 			if(!firespray.convenience.hasValidData(cache)) {return;}
-			var mouseX = d3.mouse(cache.geometryCanvas.node())[0];
+			var mouseX = d3.mouse(this)[0];
+
+			if(mouseIsPressed){
+				cache.dispatch.mouseDragMove.call(that, d3.event.movementX);
+			}
+
 			var closestPointsScaledX = firespray._hovering.injectClosestPointsFromX(mouseX, config, cache);
 			cache.interactionSvg.select('.hover-group').style({visibility: 'visible'});
 			if (typeof closestPointsScaledX !== 'undefined') {
@@ -21,8 +37,10 @@ firespray.setupHovering = function(config, cache) {
 				firespray._hovering.displayVerticalGuide(mouseX, config, cache);
 			}
 		})
-		.on('mouseenter', function(){ cache.dispatch.chartEnter.call(that); })
-		.on('mouseout', function () {
+		.on('mouseenter', function() {
+			cache.dispatch.chartEnter.call(that);
+		})
+		.on('mouseout', function() {
 			var svg = cache.interactionSvg.node();
 			var target = d3.event.relatedTarget;
 			if((svg.contains && !svg.contains(target)) ||

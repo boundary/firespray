@@ -3,16 +3,24 @@
 <head lang="en">
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<script src="../lib/d3.js"></script>
-	<script src="../firespray-0.1.2.js"></script>
+	<script src="../lib/render-slicer.js"></script>
+	<script src="../src/core.js"></script>
+	<script src="../src/default-config.js"></script>
+	<script src="../src/util.js"></script>
+	<script src="../src/hovering.js"></script>
+	<script src="../src/templates.js"></script>
+	<script src="../src/scales.js"></script>
+	<script src="../src/axis-x.js"></script>
+	<script src="../src/axis-y.js"></script>
+	<script src="../src/stripes.js"></script>
+	<script src="../src/brush.js"></script>
+	<script src="../src/containers.js"></script>
+	<script src="../src/geometries.js"></script>
 	<style>
-		body { background-color: #222; }
-		.firespray-chart .axis-x-bg { fill: none; }
-		.firespray-chart .axis-y-bg { fill: #444; }
-		.firespray-chart .stripe { fill: #303030; }
-		.firespray-chart .stripe.even { fill: none; }
-		.firespray-chart .panel-bg { fill: #333; }
-		.firespray-chart .axis-y line { stroke: #444; }
-		text { font-size: 10px; fill: #aaa; }
+		body{
+			height: 100%;
+			overflow: hidden;
+		}
 	</style>
 </head>
 <body>
@@ -21,26 +29,60 @@
 
 <script>
 
-	var data = [
-		{
-			name: 'a',
-			color: 'skyblue',
-			values: d3.range(100).map(function(d, i){ return {x: 1414291081000 + 1000*i, y: 10 * (i%2) + 10}; })
-		}
-	];
+/*
+todo:
+-1001 hardcoded
+-pixel to zoom (dragging when zoomed should pan slower) hardcoded limits
+-stripes
+-zoom from mouse instead of center
+ */
 
-	var data = firespray.utils.generateData({pointCount: 30, lineCount: 5});
+	var data = firespray.utils.generateData({pointCount: 200, lineCount: 5});
+
+	var scrollAccum = 0;
+	var mouseAccum = 0;
 
 	var chart = firespray.chart()
 		.setConfig({
 			container: document.querySelector('.chart1'),
 			width: 600,
 			height: 400,
-			renderer: 'svg',
+			theme: 'default',
 			stripeWidthInSample: 1,
 			geometryType: 'line'
 		})
-		.setData(data);
+		.setData(data)
+		.on('mouseDragMove', function(movementX){
+			var data = chart.getDataExtent();
+
+			mouseAccum += movementX;
+
+			var zoom = -(10 * scrollAccum)/100000;
+			var mult = 400 - zoom * 400 + 2;
+
+			var newData = [];
+			newData[0] = (data[0] - mult * mouseAccum) - 10 * scrollAccum;
+			newData[1] = (data[1] - mult * mouseAccum) + 10 * scrollAccum;
+
+			chart.setZoom(newData);
+		})
+		.on('mouseWheelScroll', function(scroll){
+			var data = chart.getDataExtent();
+
+			scrollAccum += scroll;
+
+			var newData = [];
+			newData[0] = (data[0] - 200 * mouseAccum) - 10 * scrollAccum;
+			newData[1] = (data[1] - 200 * mouseAccum) + 10 * scrollAccum;
+
+			if((newData[1] - newData[0]) >= 1001){
+				chart.setZoom(newData);
+			}
+			else{
+				scrollAccum -= scroll;
+			}
+
+		});
 
 </script>
 </body>

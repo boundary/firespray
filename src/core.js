@@ -28,7 +28,8 @@ firespray.chart = function module() {
 	};
 
 	cache.dispatch = d3.dispatch('brushChange', 'brushDragStart', 'brushDragMove', 'brushDragEnd',
-		'geometryHover', 'geometryOut', 'geometryClick', 'chartHover', 'chartOut', 'chartEnter');
+		'geometryHover', 'geometryOut', 'geometryClick', 'chartHover', 'chartOut', 'chartEnter',
+		'mouseDragMove', 'mouseWheelScroll');
 
 	var pipeline = firespray.utils.pipeline(
 		firespray.setupContainers,
@@ -41,12 +42,24 @@ firespray.chart = function module() {
 		firespray.setupGeometries
 	);
 
+	var pipeline2 = firespray.utils.pipeline(
+		firespray.setupScales,
+		firespray.setupAxisY,
+		firespray.setupAxisX,
+		firespray.setupStripes,
+		firespray.setupGeometries
+	);
+
 	// Public methods
 	///////////////////////////////////////////////////////////
 	var exports = {
 
 		render: function() {
 			pipeline(config, cache);
+		},
+
+		update: function() {
+			pipeline2(config, cache);
 		},
 
 		setData: function (_newData) {
@@ -89,8 +102,13 @@ firespray.chart = function module() {
 
 		setZoom: function (_newExtent) {
 			config.zoomedExtentX = _newExtent;
-			this.render();
+			this.update();
 			return this;
+		},
+
+		getZoomExtent: function (_newExtent) {
+			var extentX = config.zoomedExtentX || firespray.convenience.computeExtent(cache.data, 'x');
+			return extentX;
 		},
 
 		setBrushSelection: function (_brushSelectionExtent) {
@@ -128,9 +146,10 @@ firespray.chart = function module() {
 		},
 
 		getDataExtent: function () {
-			if(cache.extentX && cache.extentX) {
-				return {x: cache.extentX.map(function(d){ return d; }), y:cache.extentY};
-			}
+			return firespray.convenience.computeExtent(cache.data, 'x');
+//			if(cache.extentX && cache.extentX) {
+//				return {x: cache.extentX.map(function(d){ return d; }), y: cache.extentY};
+//			}
 		},
 
 		getSvgNode: function () {
