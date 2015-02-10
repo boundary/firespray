@@ -25,11 +25,15 @@ firespray.chart = function module() {
         queues: [],
         biggestY: null
     };
-    cache.dispatch = d3.dispatch("brushChange", "brushDragStart", "brushDragMove", "brushDragEnd", "geometryHover", "geometryOut", "geometryClick", "chartHover", "chartOut", "chartEnter");
+    cache.dispatch = d3.dispatch("brushChange", "brushDragStart", "brushDragMove", "brushDragEnd", "geometryHover", "geometryOut", "geometryClick", "chartHover", "chartOut", "chartEnter", "mouseDragMove", "mouseWheelScroll");
     var pipeline = firespray.utils.pipeline(firespray.setupContainers, firespray.setupScales, firespray.setupAxisY, firespray.setupAxisX, firespray.setupBrush, firespray.setupHovering, firespray.setupStripes, firespray.setupGeometries);
+    var pipeline2 = firespray.utils.pipeline(firespray.setupScales, firespray.setupAxisY, firespray.setupAxisX, firespray.setupStripes, firespray.setupGeometries);
     var exports = {
         render: function() {
             pipeline(config, cache);
+        },
+        update: function() {
+            pipeline2(config, cache);
         },
         setData: function(_newData) {
             if (!_newData || _newData.length === 0 || _newData[0].values.length === 0) {
@@ -68,8 +72,12 @@ firespray.chart = function module() {
         },
         setZoom: function(_newExtent) {
             config.zoomedExtentX = _newExtent;
-            this.render();
+            this.update();
             return this;
+        },
+        getZoomExtent: function(_newExtent) {
+            var extentX = config.zoomedExtentX || firespray.convenience.computeExtent(cache.data, "x");
+            return extentX;
         },
         setBrushSelection: function(_brushSelectionExtent) {
             if (cache.brush) {
@@ -109,14 +117,13 @@ firespray.chart = function module() {
             }
         },
         getDataExtent: function() {
-            if (cache.extentX && cache.extentX) {
-                return {
-                    x: cache.extentX.map(function(d) {
-                        return d;
-                    }),
-                    y: cache.extentY
-                };
-            }
+            return firespray.convenience.computeExtent(cache.data, "x");
+        },
+        getDataPointCount: function() {
+            return cache.data[0].values;
+        },
+        getDataPointCountInView: function() {
+            return this.getDataSlice(this.getZoomExtent())[0].values.length;
         },
         getSvgNode: function() {
             if (cache.bgSvg) {
@@ -165,14 +172,14 @@ firespray.defaultConfig = {
     suggestedXTicks: 10,
     suggestedYTicks: null,
     tickFormatX: "%H:%M:%S",
-    axisXHeight: 50,
+    axisXHeight: 20,
     axisYWidth: 0,
     isMirror: null,
     dotSize: 4,
     suffix: "",
     stripeWidthInSample: 1,
     tickFormatY: null,
-    labelYOffset: -10,
+    labelYOffset: 0,
     axisYStartsAtZero: true,
     showStripes: true,
     geometryType: "line",
@@ -287,11 +294,24 @@ firespray.setupHovering = function(config, cache) {
         return cache;
     }
     var that = this;
+    var mouseIsPressed = false;
+    document.onmousedown = function() {
+        mouseIsPressed = true;
+    };
+    document.onmouseup = function() {
+        mouseIsPressed = false;
+    };
+    d3.select(document).on("mousewheel", function() {
+        cache.dispatch.mouseWheelScroll.call(that, d3.event.wheelDelta);
+    });
     cache.interactionSvg.select(".hover-rect").on("mousemove", function() {
         if (!firespray.convenience.hasValidData(cache)) {
             return;
         }
-        var mouseX = d3.mouse(cache.geometryCanvas.node())[0];
+        var mouseX = d3.mouse(this)[0];
+        if (mouseIsPressed) {
+            cache.dispatch.mouseDragMove.call(that, d3.event.movementX);
+        }
         var closestPointsScaledX = firespray._hovering.injectClosestPointsFromX(mouseX, config, cache);
         cache.interactionSvg.select(".hover-group").style({
             visibility: "visible"
@@ -474,7 +494,7 @@ firespray.template = "<div>" + '<svg xmlns="http://www.w3.org/2000/svg" class="b
 
 firespray.themes = {
     "default": ".firespray-chart .axis-x-bg {fill: white; }" + ".firespray-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}" + ".firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".firespray-chart .stripe { fill: none; }" + ".firespray-chart .stripe.even { fill: rgb(250, 250, 250); }" + ".firespray-chart .panel-bg { fill: white; }" + ".firespray-chart .axis-y line { stroke: #eee; }" + ".firespray-chart  text { font-size: 10px; fill: #aaa; }" + ".firespray-chart  .hovered-geometry, .hover-guide-x{ stroke: #555; }" + ".firespray-chart  .domain{ display: none}",
-    dark: ".firespray-chart .axis-x-bg {fill: #222; }" + ".firespray-chart .axis-y-bg {fill: rgba(50, 50, 50, 0.5);}" + ".firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".firespray-chart .stripe { fill: #222; }" + ".firespray-chart .panel-bg { fill: #333; }" + ".firespray-chart .axis-y line { stroke: #111; }" + ".firespray-chart  text { font-size: 10px; fill: #aaa; }" + ".firespray-chart  .hovered-geometry, .hover-guide-x{ stroke: #555; }" + ".firespray-chart  .domain{ display: none}"
+    dark: ".firespray-chart .axis-x-bg {fill: #222; }" + ".firespray-chart .axis-y-bg {fill: rgba(50, 50, 50, 0.5);}" + ".firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".firespray-chart .stripe { fill: none; }" + ".firespray-chart .stripe.even { fill: #222; }" + ".firespray-chart .panel-bg { fill: #111; }" + ".firespray-chart .axis-y line { stroke: #111; }" + ".firespray-chart  text { font-size: 10px; fill: #aaa; }" + ".firespray-chart  .hovered-geometry, .hover-guide-x{ stroke: #555; }" + ".firespray-chart  .domain{ display: none}"
 };
 
 firespray.setupScales = function(config, cache) {
@@ -601,9 +621,9 @@ firespray.setupAxisY = function(config, cache) {
         if (config.showLabelsY) {
             axisContainerY.call(axisY);
             var texts = axisContainerY.selectAll("text").attr({
-                transform: "translate(" + (config.labelYOffset - 2) + ",0)"
+                transform: "translate(" + config.labelYOffset + ",0)"
             }).style({
-                "text-anchor": "start"
+                "text-anchor": config.labelYOffset > 0 ? "start" : "end"
             }).text(function(d) {
                 return parseFloat(d);
             });
@@ -641,12 +661,11 @@ firespray.setupAxisY = function(config, cache) {
         });
         return d3.max(labels);
     }
-    if (config.showTicksY) {
+    if (config.showTicksY && config.labelYOffset > 0) {
         var labels = cache.axesSvg.selectAll(".axis-y1 text, .axis-y2 text");
         var maxLabelW = findMaxLabelWidth(labels);
         var axisYBgW = maxLabelW ? maxLabelW + config.labelYOffset : 0;
-        var axisYBg = cache.axesSvg.select(".axis-y-bg");
-        axisYBg.attr({
+        var axisYBg = cache.axesSvg.select(".axis-y-bg").attr({
             width: axisYBgW,
             height: cache.chartH
         });
@@ -663,7 +682,7 @@ firespray.setupStripes = function(config, cache) {
         return this;
     }
     var stripeW = cache.scaleX(cache.data[0].values[1].x) * config.stripeWidthInSample;
-    var stripCount = Math.ceil(cache.chartW / stripeW);
+    var stripCount = Math.round(cache.chartW / stripeW);
     var stripesSelection = cache.bgSvg.select(".background").selectAll("rect.stripe").data(d3.range(stripCount));
     stripesSelection.enter().append("rect").attr({
         "class": "stripe"
@@ -766,6 +785,13 @@ firespray.setupContainers = function(config, cache) {
         height: config.height + "px",
         width: config.width + "px"
     }).select(".hover-group").attr({
+        transform: "translate(" + [ config.margin.left + cache.axisYWidth, config.margin.top ] + ")"
+    });
+    cache.interactionSvg.select(".hover-rect").attr({
+        width: cache.chartW,
+        height: cache.chartH
+    });
+    cache.interactionSvg.select(".brush-group").attr({
         transform: "translate(" + [ config.margin.left + cache.axisYWidth, config.margin.top ] + ")"
     });
     cache.bgSvg.select(".panel-bg").attr({

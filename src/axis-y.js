@@ -31,8 +31,8 @@ firespray.setupAxisY = function (config, cache){
 		// labels
 		if(config.showLabelsY){
 			axisContainerY.call(axisY);
-			var texts = axisContainerY.selectAll('text').attr({transform: 'translate(' + (config.labelYOffset - 2) + ',0)'})
-				.style({'text-anchor': 'start'})
+			var texts = axisContainerY.selectAll('text').attr({transform: 'translate(' + (config.labelYOffset) + ',0)'})
+				.style({'text-anchor': (config.labelYOffset > 0) ? 'start' : 'end'})
 				.text(function(d){ return parseFloat(d); });
 			texts.filter(function(d, i){ return i === 0; }).text(function(){ return this.textContent + ' ' + config.suffix; });
 			if(config.tickFormatY) {texts.text(config.tickFormatY);}
@@ -69,12 +69,12 @@ firespray.setupAxisY = function (config, cache){
 		});
 		return d3.max(labels);
 	}
-	if (config.showTicksY) {
+	if (config.showTicksY && config.labelYOffset > 0) {
 		var labels = cache.axesSvg.selectAll('.axis-y1 text, .axis-y2 text');
 		var maxLabelW = findMaxLabelWidth(labels);
 		var axisYBgW = maxLabelW ? maxLabelW + config.labelYOffset : 0;
-		var axisYBg = cache.axesSvg.select('.axis-y-bg');
-		axisYBg.attr({width: axisYBgW, height: cache.chartH});
+		var axisYBg = cache.axesSvg.select('.axis-y-bg')
+			.attr({width: axisYBgW, height: cache.chartH});
 	}
 
 	cache.axesSvg.select('.domain').style({fill: 'none', stroke: 'none'});

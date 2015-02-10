@@ -56,13 +56,13 @@
 			container: container1,
 			width: container1.clientWidth,
 			height: container1.clientHeight,
-			theme: 'default',
+			theme: 'dark',
 			geometryType: 'line',
 			showAxisY: false,
 			useBrush: true
 		})
 		.on('brushChange', function(brushExtent){
-			chart1.setZoom(brushExtent);
+			chart1.setData(timeSelectorChart.getDataUnderBrush());
 			chart2.setData(timeSelectorChart.getDataUnderBrush());
 		})
 		.setData(data);
@@ -73,7 +73,7 @@
 			container: container2,
 			width: container2.clientWidth,
 			height: container2.clientHeight,
-			theme: 'default',
+			theme: 'dark',
 			geometryType: 'stackedArea'
 		})
 		.setData(data);
@@ -84,7 +84,7 @@
 			container: container3,
 			width: container3.clientWidth,
 			height: container3.clientHeight,
-			theme: 'default',
+			theme: 'dark',
 			geometryType: 'stackedBar'
 		})
 		.setData(data);

@@ -5,7 +5,7 @@ firespray.setupStripes = function(config, cache){
 
 	// stripes
 	var stripeW = cache.scaleX(cache.data[0].values[1].x) * config.stripeWidthInSample;
-	var stripCount = Math.ceil(cache.chartW / stripeW);
+	var stripCount = Math.round(cache.chartW / stripeW);
 
 	var stripesSelection = cache.bgSvg.select('.background').selectAll('rect.stripe')
 		.data(d3.range(stripCount));

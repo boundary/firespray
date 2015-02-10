@@ -152,6 +152,14 @@ firespray.chart = function module() {
 //			}
 		},
 
+		getDataPointCount: function () {
+			return cache.data[0].values;
+		},
+
+		getDataPointCountInView: function () {
+			return this.getDataSlice(this.getZoomExtent())[0].values.length;
+		},
+
 		getSvgNode: function () {
 			if(cache.bgSvg) {
 				return cache.bgSvg.node();

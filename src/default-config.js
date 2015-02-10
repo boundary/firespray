@@ -13,14 +13,14 @@ firespray.defaultConfig = {
 	suggestedXTicks: 10,
 	suggestedYTicks: null,
 	tickFormatX: '%H:%M:%S', //linear: ',.4s', time: '%H:%M:%S'
-	axisXHeight: 50,
+	axisXHeight: 20,
 	axisYWidth: 0,
 	isMirror: null,
 	dotSize: 4,
 	suffix: '',
 	stripeWidthInSample: 1,
 	tickFormatY: null,
-	labelYOffset: -10,
+	labelYOffset: 0,
 	axisYStartsAtZero: true,
 	showStripes: true,
 	geometryType: 'line', // bar, percentBar

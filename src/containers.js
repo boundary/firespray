@@ -42,6 +42,10 @@ firespray.setupContainers = function(config, cache){
 	cache.interactionSvg.style({height: config.height + 'px', width: config.width + 'px'})
 		.select('.hover-group')
 		.attr({transform: 'translate(' + [config.margin.left + cache.axisYWidth, config.margin.top] + ')'});
+	cache.interactionSvg.select('.hover-rect')
+		.attr({width: cache.chartW, height: cache.chartH});
+	cache.interactionSvg.select('.brush-group')
+		.attr({transform: 'translate(' + [config.margin.left + cache.axisYWidth, config.margin.top] + ')'});
 
 	// background
 	cache.bgSvg.select('.panel-bg').attr({width: cache.chartW, height: cache.chartH});
