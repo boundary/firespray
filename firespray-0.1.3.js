@@ -28,14 +28,10 @@ fy.chart = function module() {
         biggestY: null
     };
     cache.dispatch = d3.dispatch("brushChange", "brushDragStart", "brushDragMove", "brushDragEnd", "geometryHover", "geometryOut", "geometryClick", "chartHover", "chartOut", "chartEnter", "mouseDragMove", "mouseWheelScroll");
-    var renderPipeline = fy.utils.pipeline(fy.setupContainers, fy.setupScales, fy.setupAxisY, fy.setupAxisX, fy.setupBrush, fy.setupHovering, fy.setupStripes, fy.setupGeometries);
-    var updatePipeline = fy.utils.pipeline(fy.setupScales, fy.setupAxisY, fy.setupAxisX, fy.setupStripes, fy.setupGeometries);
+    var pipeline = fy.utils.pipeline(fy.setupContainers, fy.setupBrush, fy.setupScales, fy.setupAxisY, fy.setupAxisX, fy.setupHovering, fy.setupStripes, fy.setupGeometries);
     var exports = {
         render: function() {
-            renderPipeline(config, cache);
-        },
-        update: function() {
-            updatePipeline(config, cache);
+            pipeline(config, cache);
         },
         setData: function(_newData) {
             if (!_newData || _newData.length === 0 || _newData[0].values.length === 0) {
@@ -61,27 +57,21 @@ fy.chart = function module() {
             return this;
         },
         getDataSlice: function(_sliceExtentX) {
-            var dataSlice = fy.utils.cloneJSON(cache.data).map(function(d) {
-                d.values = d.values.filter(function(dB) {
-                    return dB.x >= _sliceExtentX[0] && dB.x <= _sliceExtentX[1];
-                });
-                return d;
-            });
-            return dataSlice;
+            return fy.dataUtils.getDataSlice(cache, _sliceExtentX);
         },
         getDataUnderBrush: function() {
-            return exports.getDataSlice(exports.getBrushExtent());
+            return fy.dataUtils.getDataSlice(cache, fy.graphicUtils.getBrushExtent(cache));
         },
         getDataInView: function() {
-            return exports.getDataSlice(exports.getZoomExtent());
+            return fy.dataUtils.getDataSlice(cache, exports.getZoomExtent());
         },
         setZoom: function(_newExtent) {
             config.zoomedExtentX = _newExtent;
-            this.update();
+            this.render();
             return this;
         },
         getZoomExtent: function() {
-            return config.zoomedExtentX || fy.dataUtils.computeExtent(cache.data, "x");
+            return fy.graphicUtils.getZoomExtent(cache, config);
         },
         setBrushSelection: function(_brushSelectionExtent) {
             if (cache.brush) {
@@ -114,20 +104,19 @@ fy.chart = function module() {
             }
         },
         getBrushExtent: function() {
-            if (cache.brush.extent()) {
-                return cache.brush.extent().map(function(d) {
-                    return d.getTime();
-                });
-            }
+            return fy.graphicUtils.getBrushExtent(cache);
         },
         getDataExtent: function() {
-            return fy.dataUtils.computeExtent(cache.data, "x");
+            return {
+                x: fy.dataUtils.computeExtent(cache, "x"),
+                y: fy.dataUtils.computeExtent(cache, "y")
+            };
         },
         getDataPointCount: function() {
             return cache.data[0].values.length;
         },
         getDataPointCountInView: function() {
-            return this.getDataSlice(this.getZoomExtent())[0].values.length;
+            return fy.dataUtils.getDataSlice(this.getZoomExtent())[0].values.length;
         },
         getSvgNode: function() {
             if (cache.bgSvg) {
@@ -150,6 +139,11 @@ fy.chart = function module() {
                     width: config.container.clientWidth,
                     height: config.container.clientHeight
                 }).refresh();
+                fy.utils.override({
+                    width: config.container.clientWidth,
+                    height: config.container.clientHeight
+                });
+                this.refresh();
             }
             return this;
         }
@@ -286,23 +280,61 @@ fy.dataUtils = {
             return false;
         }
     },
-    computeExtent: function(_data, _axis) {
-        return d3.extent(d3.merge(_data.map(function(d) {
+    computeExtent: function(cache, _axis) {
+        return d3.extent(d3.merge(cache.data.map(function(d) {
             return d.values.map(function(dB) {
                 return dB[_axis];
             });
         })));
     },
+    getDataSlice: function(cache, _sliceExtentX) {
+        var dataSlice = fy.utils.cloneJSON(cache.data).map(function(d) {
+            d.values = d.values.filter(function(dB) {
+                return dB.x >= _sliceExtentX[0] && dB.x <= _sliceExtentX[1];
+            });
+            return d;
+        });
+        return dataSlice;
+    }
+};
+
+fy.graphicUtils = {
+    getBrushExtent: function(cache) {
+        if (cache.brush.extent()) {
+            return cache.brush.extent().map(function(d) {
+                return d.getTime();
+            });
+        }
+    },
     sampleWidthInPx: function(cache) {
-        return cache.scaleX(cache.data[0].values[2].x) - cache.scaleX(cache.data[1].values[1].x);
+        return cache.scaleX(cache.data[0].values[2].x) - cache.scaleX(cache.data[0].values[1].x);
+    },
+    getZoomExtent: function(cache, config) {
+        return config.zoomedExtentX || fy.dataUtils.computeExtent(cache, "x");
     }
 };
 
 fy.setupHovering = function(config, cache) {
-    if (config.useBrush) {
+    if (config.useBrush || typeof cache.interactionSvg.select(".hover-rect").on("mousemove") === "function") {
         return cache;
     }
     var that = this;
+    var scrollAccum = 0;
+    var mouseAccum = 0;
+    var zoomSpeed = 10;
+    var panSpeed = 1e3;
+    function computeNewExtent() {
+        var sampleWidthInPx = fy.graphicUtils.sampleWidthInPx(cache);
+        var extentX = fy.dataUtils.computeExtent(cache, "x");
+        var newExtentX = [];
+        newExtentX[0] = extentX[0] - zoomSpeed * scrollAccum - panSpeed * mouseAccum / sampleWidthInPx;
+        newExtentX[1] = extentX[1] + zoomSpeed * scrollAccum - panSpeed * mouseAccum / sampleWidthInPx;
+        if (newExtentX[1] - newExtentX[0] >= 1001) {
+            return newExtentX;
+        } else {
+            return;
+        }
+    }
     var mouseIsPressed = false;
     document.onmousedown = function() {
         mouseIsPressed = true;
@@ -311,7 +343,9 @@ fy.setupHovering = function(config, cache) {
         mouseIsPressed = false;
     };
     d3.select(document).on("mousewheel", function() {
-        cache.dispatch.mouseWheelScroll.call(that, d3.event.wheelDelta, fy.dataUtils.sampleWidthInPx(cache));
+        scrollAccum += d3.event.wheelDelta;
+        var newExtentX = computeNewExtent();
+        cache.dispatch.mouseWheelScroll.call(that, newExtentX);
     });
     cache.interactionSvg.select(".hover-rect").on("mousemove", function() {
         if (!fy.dataUtils.hasValidData(cache)) {
@@ -319,7 +353,9 @@ fy.setupHovering = function(config, cache) {
         }
         var mouseX = d3.mouse(this)[0];
         if (mouseIsPressed) {
-            cache.dispatch.mouseDragMove.call(that, d3.event.movementX, fy.dataUtils.sampleWidthInPx(cache));
+            mouseAccum += d3.event.movementX;
+            var newExtentX = computeNewExtent();
+            cache.dispatch.mouseDragMove.call(that, newExtentX);
         }
         var closestPointsScaledX = fy._hovering.injectClosestPointsFromX(mouseX, config, cache);
         cache.interactionSvg.select(".hover-group").style({
@@ -510,15 +546,15 @@ fy.setupScales = function(config, cache) {
     setupScaleX();
     setupScaleY();
     function setupScaleX() {
-        var extentX = config.zoomedExtentX || fy.dataUtils.computeExtent(cache.data, "x");
+        var extentX = fy.graphicUtils.getZoomExtent(cache, config);
         cache.scaleX.domain(extentX);
         cache.extentX = extentX;
     }
     function setupScaleY() {
-        var extentY = fy.dataUtils.computeExtent(cache.data, "y");
+        var extentY = fy.dataUtils.computeExtent(cache, "y");
         cache.biggestY = "y";
         if (cache.isMirror !== false && fy.dataUtils.hasValidDataY2(cache)) {
-            var extentY2 = fy.dataUtils.computeExtent(cache.data, "y2");
+            var extentY2 = fy.dataUtils.computeExtent(cache, "y2");
             if (extentY2[1] > extentY[1]) {
                 cache.biggestY = "y2";
             }
@@ -690,7 +726,7 @@ fy.setupStripes = function(config, cache) {
     if (!config.showStripes || !fy.dataUtils.hasValidData(cache)) {
         return this;
     }
-    var stripeW = fy.dataUtils.sampleWidthInPx(cache);
+    var stripeW = fy.graphicUtils.sampleWidthInPx(cache);
     var stripCount = Math.round(cache.chartW / stripeW);
     var stripesSelection = cache.bgSvg.select(".background").selectAll("rect.stripe").data(d3.range(stripCount));
     stripesSelection.enter().append("rect").attr({
@@ -751,23 +787,24 @@ fy.setupContainers = function(config, cache) {
     if (!config.container) {
         throw "A container is needed";
     }
-    if (!cache.root && config.container) {
-        var container = d3.select(config.container).append("div");
-        container.html(fy.template);
-        cache.root = container.style({
-            position: "absolute"
-        }).classed("chart fy-chart", true);
-        cache.bgSvg = cache.root.select("svg.bg");
-        cache.axesSvg = cache.root.select("svg.axes");
-        cache.interactionSvg = cache.root.select("svg.interaction").attr({
-            id: Math.random()
-        });
-        cache.geometryCanvas = cache.root.select("canvas.geometry");
-        cache.geometrySVG = cache.root.select("svg.geometry-svg");
-        cache.root.selectAll("svg, canvas").style({
-            position: "absolute"
-        });
+    if (cache.root) {
+        return cache;
     }
+    var container = d3.select(config.container).append("div");
+    container.html(fy.template);
+    cache.root = container.style({
+        position: "absolute"
+    }).classed("chart fy-chart", true);
+    cache.bgSvg = cache.root.select("svg.bg");
+    cache.axesSvg = cache.root.select("svg.axes");
+    cache.interactionSvg = cache.root.select("svg.interaction").attr({
+        id: Math.random()
+    });
+    cache.geometryCanvas = cache.root.select("canvas.geometry");
+    cache.geometrySVG = cache.root.select("svg.geometry-svg");
+    cache.root.selectAll("svg, canvas").style({
+        position: "absolute"
+    });
     var scales = {
         time: d3.time.scale(),
         linear: d3.scale.linear()
