@@ -129,10 +129,11 @@ fy._computeGeometryData = function( config, cache ) {
 fy._renderAreaGeometrySVG = function( config, cache ) {
 
 	// area geometry SVG
-	cache.geometrySVG.attr( {
-		width: cache.chartW,
-		height: cache.chartH
-	} )
+	cache.geometrySVG
+		.attr( {
+			width: cache.chartW,
+			height: cache.chartH
+		} )
 		.style( {
 			top: config.margin.top + 'px',
 			left: config.margin.left + 'px'
@@ -151,11 +152,12 @@ fy._renderAreaGeometrySVG = function( config, cache ) {
 
 	var lines = cache.geometrySVG.selectAll( 'path.geometry' ).data( cache.data );
 	lines.enter().append( 'path' ).classed( 'geometry', true );
-	lines.attr( {
-		d: function( d ) {
-			return area( d.values );
-		}
-	} )
+	lines
+		.attr( {
+			d: function( d ) {
+				return area( d.values );
+			}
+		} )
 		.style( {
 			stroke: function( d ) {
 				return d.color;
@@ -170,10 +172,11 @@ fy._renderAreaGeometrySVG = function( config, cache ) {
 fy._renderLineGeometrySVG = function( config, cache ) {
 
 	// line geometry SVG
-	cache.geometrySVG.attr( {
-		width: cache.chartW,
-		height: cache.chartH
-	} )
+	cache.geometrySVG
+		.attr( {
+			width: cache.chartW,
+			height: cache.chartH
+		} )
 		.style( {
 			top: config.margin.top + 'px',
 			left: config.margin.left + 'px'
@@ -189,11 +192,12 @@ fy._renderLineGeometrySVG = function( config, cache ) {
 
 	var lines = cache.geometrySVG.selectAll( 'path.geometry' ).data( cache.data );
 	lines.enter().append( 'path' ).classed( 'geometry', true );
-	lines.attr( {
-		d: function( d ) {
-			return line( d.values );
-		}
-	} )
+	lines
+		.attr( {
+			d: function( d ) {
+				return line( d.values );
+			}
+		} )
 		.style( {
 			stroke: function( d ) {
 				return d.color;
@@ -206,10 +210,11 @@ fy._renderLineGeometrySVG = function( config, cache ) {
 fy._renderLineGeometry = function( config, cache ) {
 
 	// line geometry canvas
-	cache.geometryCanvas.attr( {
-		width: cache.chartW,
-		height: cache.chartH
-	} )
+	cache.geometryCanvas
+		.attr( {
+			width: cache.chartW,
+			height: cache.chartH
+		} )
 		.style( {
 			top: config.margin.top + 'px',
 			left: config.margin.left + 'px'
@@ -306,10 +311,11 @@ fy._renderBarGeometrySVG = function( config, cache ) {
 fy._renderBarGeometry = function( config, cache ) {
 
 	// bar geometry canvas
-	cache.geometryCanvas.attr( {
-		width: cache.chartW,
-		height: cache.chartH
-	} )
+	cache.geometryCanvas
+		.attr( {
+			width: cache.chartW,
+			height: cache.chartH
+		} )
 		.style( {
 			top: config.margin.top + 'px',
 			left: config.margin.left + 'px'
@@ -343,5 +349,5 @@ fy._renderBarGeometry = function( config, cache ) {
 			} );
 		} );
 	}
-	
+
 };

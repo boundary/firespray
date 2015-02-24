@@ -41,8 +41,8 @@ fy.setupScales = function( config, cache ) {
 				} );
 			} ) )
 				.map( function( d, i ) {
-								return d3.sum( d );
-							} );
+					return d3.sum( d );
+				} );
 			var stackedMaxValueSum = d3.max( stackedMaxValues );
 			cache.extentY = [0, stackedMaxValueSum];
 			scaleYCopy.domain( cache.extentY );

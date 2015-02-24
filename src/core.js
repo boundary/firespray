@@ -1,4 +1,4 @@
-var firespray = {version: '0.1.2'};
+var firespray = {version: '0.1.3'};
 var fy = firespray;
 
 fy.chart = function module() {
@@ -107,7 +107,6 @@ fy.chart = function module() {
 		},
 
 		getDataInView: function() {
-			console.log( this.getZoomExtent, exports.getZoomExtent );
 			return exports.getDataSlice( exports.getZoomExtent() );
 		},
 
