@@ -33,21 +33,13 @@ fy.chart = function module() {
 		'geometryHover', 'geometryOut', 'geometryClick', 'chartHover', 'chartOut', 'chartEnter',
 		'mouseDragMove', 'mouseWheelScroll' );
 
-	var renderPipeline = fy.utils.pipeline(
+	var pipeline = fy.utils.pipeline(
 		fy.setupContainers,
-		fy.setupScales,
-		fy.setupAxisY,
-		fy.setupAxisX,
 		fy.setupBrush,
-		fy.setupHovering,
-		fy.setupStripes,
-		fy.setupGeometries
-	);
-
-	var updatePipeline = fy.utils.pipeline(
 		fy.setupScales,
 		fy.setupAxisY,
 		fy.setupAxisX,
+		fy.setupHovering,
 		fy.setupStripes,
 		fy.setupGeometries
 	);
@@ -57,11 +49,7 @@ fy.chart = function module() {
 	var exports = {
 
 		render: function() {
-			renderPipeline( config, cache );
-		},
-
-		update: function() {
-			updatePipeline( config, cache );
+			pipeline( config, cache );
 		},
 
 		setData: function( _newData ) {
@@ -92,32 +80,25 @@ fy.chart = function module() {
 		},
 
 		getDataSlice: function( _sliceExtentX ) {
-			var dataSlice = fy.utils.cloneJSON( cache.data )
-				.map( function( d ) {
-					d.values = d.values.filter( function( dB ) {
-						return dB.x >= _sliceExtentX[0] && dB.x <= _sliceExtentX[1];
-					} );
-					return d;
-				} );
-			return dataSlice;
+			return fy.dataUtils.getDataSlice( cache, _sliceExtentX )
 		},
 
 		getDataUnderBrush: function() {
-			return exports.getDataSlice( exports.getBrushExtent() );
+			return fy.dataUtils.getDataSlice( cache, fy.graphicUtils.getBrushExtent( cache ) );
 		},
 
 		getDataInView: function() {
-			return exports.getDataSlice( exports.getZoomExtent() );
+			return fy.dataUtils.getDataSlice( cache, exports.getZoomExtent() );
 		},
 
 		setZoom: function( _newExtent ) {
 			config.zoomedExtentX = _newExtent;
-			this.update();
+			this.render();
 			return this;
 		},
 
 		getZoomExtent: function() {
-			return config.zoomedExtentX || fy.dataUtils.computeExtent( cache.data, 'x' );
+			return fy.graphicUtils.getZoomExtent( cache, config );
 		},
 
 		setBrushSelection: function( _brushSelectionExtent ) {
@@ -155,15 +136,14 @@ fy.chart = function module() {
 		},
 
 		getBrushExtent: function() {
-			if ( cache.brush.extent() ) {
-				return cache.brush.extent().map( function( d ) {
-					return d.getTime();
-				} );
-			}
+			return fy.graphicUtils.getBrushExtent( cache );
 		},
 
 		getDataExtent: function() {
-			return fy.dataUtils.computeExtent( cache.data, 'x' );
+			return {
+				x: fy.dataUtils.computeExtent( cache, 'x' ),
+				y: fy.dataUtils.computeExtent( cache, 'y' )
+			}
 		},
 
 		getDataPointCount: function() {
@@ -171,7 +151,7 @@ fy.chart = function module() {
 		},
 
 		getDataPointCountInView: function() {
-			return this.getDataSlice( this.getZoomExtent() )[0].values.length;
+			return fy.dataUtils.getDataSlice( this.getZoomExtent() )[0].values.length;
 		},
 
 		getSvgNode: function() {
@@ -195,6 +175,8 @@ fy.chart = function module() {
 		resizeToContainerSize: function() {
 			if ( config.container ) {
 				exports.setConfig( {width: config.container.clientWidth, height: config.container.clientHeight} ).refresh();
+				fy.utils.override( {width: config.container.clientWidth, height: config.container.clientHeight} );
+				this.refresh();
 			}
 			return this;
 		}

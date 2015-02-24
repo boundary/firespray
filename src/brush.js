@@ -1,6 +1,7 @@
 // Brush
 ///////////////////////////////////////////////////////////
 fy.setupBrush = function( config, cache ) {
+
 	if ( !config.useBrush || cache.brush ) {
 		return cache;
 	}
@@ -11,6 +12,7 @@ fy.setupBrush = function( config, cache ) {
 	var brushDragMove = fy.utils.throttle( cache.dispatch.brushDragMove, config.brushThrottleWaitDuration );
 
 	cache.brushExtent = cache.brushExtent || cache.scaleX.domain();
+
 	cache.brush.x( cache.scaleX )
 		.extent( cache.brushExtent )
 		.on( "brush", function() {
@@ -35,10 +37,12 @@ fy.setupBrush = function( config, cache ) {
 				return d.getTime();
 			} ) );
 		} );
+
 	cache.interactionSvg.select( '.brush-group' )
 		.call( cache.brush )
 		.selectAll( 'rect' )
 		.attr( {height: cache.chartH + cache.axisXHeight, y: 0} );
 
 	return cache;
+
 };

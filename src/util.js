@@ -102,16 +102,43 @@ fy.dataUtils = {
 		}
 	},
 
-	computeExtent: function( _data, _axis ) {
-		return d3.extent( d3.merge( _data.map( function( d ) {
+	computeExtent: function( cache, _axis ) {
+		return d3.extent( d3.merge( cache.data.map( function( d ) {
 			return d.values.map( function( dB ) {
 				return dB[_axis];
 			} );
 		} ) ) );
 	},
 
+	getDataSlice: function( cache, _sliceExtentX ) {
+		var dataSlice = fy.utils.cloneJSON( cache.data )
+			.map( function( d ) {
+				d.values = d.values.filter( function( dB ) {
+					return dB.x >= _sliceExtentX[0] && dB.x <= _sliceExtentX[1];
+				} );
+				return d;
+			} );
+		return dataSlice;
+	}
+
+};
+
+fy.graphicUtils = {
+
+	getBrushExtent: function( cache ) {
+		if ( cache.brush.extent() ) {
+			return cache.brush.extent().map( function( d ) {
+				return d.getTime();
+			} );
+		}
+	},
+
 	sampleWidthInPx: function( cache ) {
-		return cache.scaleX( cache.data[0].values[2].x ) - cache.scaleX( cache.data[1].values[1].x );
+		return cache.scaleX( cache.data[0].values[2].x ) - cache.scaleX( cache.data[0].values[1].x );
+	},
+
+	getZoomExtent: function( cache, config ) {
+		return config.zoomedExtentX || fy.dataUtils.computeExtent( cache, 'x' );
 	}
 
 };

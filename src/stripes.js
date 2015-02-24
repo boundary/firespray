@@ -7,7 +7,7 @@ fy.setupStripes = function( config, cache ) {
 	}
 
 	// stripes
-	var stripeW = fy.dataUtils.sampleWidthInPx( cache );
+	var stripeW = fy.graphicUtils.sampleWidthInPx( cache );
 
 	var stripCount = Math.round( cache.chartW / stripeW );
 

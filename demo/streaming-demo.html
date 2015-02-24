@@ -4,7 +4,18 @@
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<script src="../lib/d3.js"></script>
 	<script src="../lib/render-slicer.js"></script>
-	<script src="../firespray-0.1.2.js"></script>
+  <script src="../src/core.js"></script>
+  <script src="../src/default-config.js"></script>
+  <script src="../src/util.js"></script>
+  <script src="../src/hovering.js"></script>
+  <script src="../src/templates.js"></script>
+  <script src="../src/scales.js"></script>
+  <script src="../src/axis-x.js"></script>
+  <script src="../src/axis-y.js"></script>
+  <script src="../src/stripes.js"></script>
+  <script src="../src/brush.js"></script>
+  <script src="../src/containers.js"></script>
+  <script src="../src/geometries.js"></script>
 </head>
 <body>
 
@@ -12,7 +23,8 @@
 
 <script>
 
-	var generatedData = firespray.utils.generateData({pointCount: 100, lineCount: 3, valueCount: 2});
+	var generatedData = firespray.dataUtils.generateData({pointCount: 100, lineCount: 3,
+	 valueCount: 2});
 
 	var chart = firespray.chart()
 		.setConfig({
@@ -30,7 +42,7 @@
 		var newEpoch = lastEpoch + 1000;
 		generatedData.forEach(function(d){
 			d.values.shift();
-			d.values.push(firespray.utils.generateDataPoint({epoch: newEpoch, valueCount: 2}));
+			d.values.push(firespray.dataUtils.generateDataPoint({epoch: newEpoch, valueCount: 2}));
 		});
 		lastEpoch = newEpoch;
 		chart.setData(generatedData);

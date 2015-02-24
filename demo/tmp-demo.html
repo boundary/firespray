@@ -55,7 +55,7 @@ todo:
 		})
 		.setData(data)
 		.on('mouseDragMove', function(movementX, sampleWidthInPx){
-			var data = chart.getDataExtent();
+			var data = chart.getDataExtent().x;
 
 			mouseAccum += movementX;
 
@@ -66,7 +66,7 @@ todo:
 			chart.setZoom(newData);
 		})
 		.on('mouseWheelScroll', function(scroll, sampleWidthInPx){
-			var data = chart.getDataExtent();
+			var data = chart.getDataExtent().x;
 
 			scrollAccum += scroll;
 

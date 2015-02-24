@@ -6,18 +6,18 @@ fy.setupScales = function( config, cache ) {
 	setupScaleY();
 
 	function setupScaleX() {
-		var extentX = config.zoomedExtentX || fy.dataUtils.computeExtent( cache.data, 'x' );
+		var extentX = fy.graphicUtils.getZoomExtent( cache, config );
 		//TODO scaleX.range?
 		cache.scaleX.domain( extentX );
 		cache.extentX = extentX;
 	}
 
 	function setupScaleY() {
-		var extentY = fy.dataUtils.computeExtent( cache.data, 'y' );
+		var extentY = fy.dataUtils.computeExtent( cache, 'y' );
 
 		cache.biggestY = 'y';
 		if ( cache.isMirror !== false && fy.dataUtils.hasValidDataY2( cache ) ) {
-			var extentY2 = fy.dataUtils.computeExtent( cache.data, 'y2' );
+			var extentY2 = fy.dataUtils.computeExtent( cache, 'y2' );
 			if ( (extentY2[1] > extentY[1]) ) {
 				cache.biggestY = 'y2';
 			}

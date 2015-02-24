@@ -2,9 +2,11 @@
 ///////////////////////////////////////////////////////////
 fy.setupHovering = function( config, cache ) {
 
-	if ( config.useBrush ) {
+	if ( config.useBrush ||
+		typeof cache.interactionSvg.select( '.hover-rect' ).on( 'mousemove' ) === 'function' ) {
 		return cache;
 	}
+
 	var that = this;
 
 	var mouseIsPressed = false;
@@ -15,7 +17,7 @@ fy.setupHovering = function( config, cache ) {
 		mouseIsPressed = false;
 	};
 	d3.select( document ).on( 'mousewheel', function() {
-		cache.dispatch.mouseWheelScroll.call( that, d3.event.wheelDelta, fy.dataUtils.sampleWidthInPx( cache ) );
+		cache.dispatch.mouseWheelScroll.call( that, d3.event.wheelDelta, fy.graphicUtils.sampleWidthInPx( cache ) );
 	} );
 
 	cache.interactionSvg.select( '.hover-rect' )
@@ -26,7 +28,7 @@ fy.setupHovering = function( config, cache ) {
 			var mouseX = d3.mouse( this )[0];
 
 			if ( mouseIsPressed ) {
-				cache.dispatch.mouseDragMove.call( that, d3.event.movementX, fy.dataUtils.sampleWidthInPx( cache ) );
+				cache.dispatch.mouseDragMove.call( that, d3.event.movementX, fy.graphicUtils.sampleWidthInPx( cache ) );
 			}
 
 			var closestPointsScaledX = fy._hovering.injectClosestPointsFromX( mouseX, config, cache );
