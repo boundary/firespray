@@ -1,45 +1,55 @@
 // Scales
 ///////////////////////////////////////////////////////////
-firespray.setupScales = function(config, cache){
+firespray.setupScales = function( config, cache ) {
 
 	setupScaleX();
 	setupScaleY();
 
-	function setupScaleX(){
-		var extentX = config.zoomedExtentX || firespray.dataUtils.computeExtent(cache.data, 'x');
+	function setupScaleX() {
+		var extentX = config.zoomedExtentX || firespray.dataUtils.computeExtent( cache.data, 'x' );
 		//TODO scaleX.range?
-		cache.scaleX.domain(extentX);
+		cache.scaleX.domain( extentX );
 		cache.extentX = extentX;
 	}
 
-	function setupScaleY(){
-		var extentY = firespray.dataUtils.computeExtent(cache.data, 'y');
+	function setupScaleY() {
+		var extentY = firespray.dataUtils.computeExtent( cache.data, 'y' );
 
 		cache.biggestY = 'y';
-		if(cache.isMirror !== false && firespray.dataUtils.hasValidDataY2(cache)) {
-			var extentY2 = firespray.dataUtils.computeExtent(cache.data, 'y2');
-			if((extentY2[1] > extentY[1])) {cache.biggestY = 'y2';}
-			extentY = [Math.min(extentY[0], extentY2[0]), Math.max(extentY[1], extentY2[1])];
+		if ( cache.isMirror !== false && firespray.dataUtils.hasValidDataY2( cache ) ) {
+			var extentY2 = firespray.dataUtils.computeExtent( cache.data, 'y2' );
+			if ( (extentY2[1] > extentY[1]) ) {
+				cache.biggestY = 'y2';
+			}
+			extentY = [Math.min( extentY[0], extentY2[0] ), Math.max( extentY[1], extentY2[1] )];
 		}
 
-		if (cache.isMirror) {cache.scaleY.range([cache.chartH / 2, 0]);}
-		else {cache.scaleY.range([cache.chartH, 0]);}
+		if ( cache.isMirror ) {
+			cache.scaleY.range( [cache.chartH / 2, 0] );
+		}
+		else {
+			cache.scaleY.range( [cache.chartH, 0] );
+		}
 
 		var scaleYCopy = cache.scaleY.copy();
-		if(config.geometryType === 'stackedLine' ||
+		if ( config.geometryType === 'stackedLine' ||
 			config.geometryType === 'stackedArea' ||
-			config.geometryType === 'stackedBar'){
-			var stackedMaxValues = d3.zip.apply(null, cache.data.map(function(d, i){
-					return d.values.map(function(d, i){ return d.y; });
-				}))
-				.map(function(d, i){ return d3.sum(d); });
-			var stackedMaxValueSum = d3.max(stackedMaxValues);
+			config.geometryType === 'stackedBar' ) {
+			var stackedMaxValues = d3.zip.apply( null, cache.data.map( function( d, i ) {
+				return d.values.map( function( d, i ) {
+					return d.y;
+				} );
+			} ) )
+				.map( function( d, i ) {
+								return d3.sum( d );
+							} );
+			var stackedMaxValueSum = d3.max( stackedMaxValues );
 			cache.extentY = [0, stackedMaxValueSum];
-			scaleYCopy.domain(cache.extentY);
+			scaleYCopy.domain( cache.extentY );
 		}
-		else{
-			cache.extentY = config.axisYStartsAtZero ? [0, extentY[1]] : extentY ;
-			cache.scaleY.domain(cache.extentY);
+		else {
+			cache.extentY = config.axisYStartsAtZero ? [0, extentY[1]] : extentY;
+			cache.scaleY.domain( cache.extentY );
 		}
 	}
 

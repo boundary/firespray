@@ -23,24 +23,24 @@ firespray.template = '<div>' +
 
 firespray.themes = {
 	default: '.firespray-chart .axis-x-bg {fill: white; }' +
-	'.firespray-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}' +
-	'.firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }' +
-	'.firespray-chart .stripe { fill: none; }' +
-	'.firespray-chart .stripe.even { fill: rgb(250, 250, 250); }' +
-	'.firespray-chart .panel-bg { fill: white; }' +
-	'.firespray-chart .axis-y line { stroke: #eee; }' +
-	'.firespray-chart  text { font-size: 10px; fill: #aaa; }'+
-	'.firespray-chart  .hovered-geometry, .hover-guide-x{ stroke: #555; }' +
-	'.firespray-chart  .domain{ display: none}',
+		'.firespray-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}' +
+		'.firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }' +
+		'.firespray-chart .stripe { fill: none; }' +
+		'.firespray-chart .stripe.even { fill: rgb(250, 250, 250); }' +
+		'.firespray-chart .panel-bg { fill: white; }' +
+		'.firespray-chart .axis-y line { stroke: #eee; }' +
+		'.firespray-chart  text { font-size: 10px; fill: #aaa; }' +
+		'.firespray-chart  .hovered-geometry, .hover-guide-x{ stroke: #555; }' +
+		'.firespray-chart  .domain{ display: none}',
 
 	dark: '.firespray-chart .axis-x-bg {fill: #222; }' +
-	'.firespray-chart .axis-y-bg {fill: rgba(50, 50, 50, 0.5);}' +
-	'.firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }' +
-	'.firespray-chart .stripe { fill: none; }' +
-	'.firespray-chart .stripe.even { fill: #222; }' +
-	'.firespray-chart .panel-bg { fill: #111; }' +
-	'.firespray-chart .axis-y line { stroke: #111; }' +
-	'.firespray-chart  text { font-size: 10px; fill: #aaa; }'+
-	'.firespray-chart  .hovered-geometry, .hover-guide-x{ stroke: #555; }' +
-	'.firespray-chart  .domain{ display: none}'
+		'.firespray-chart .axis-y-bg {fill: rgba(50, 50, 50, 0.5);}' +
+		'.firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }' +
+		'.firespray-chart .stripe { fill: none; }' +
+		'.firespray-chart .stripe.even { fill: #222; }' +
+		'.firespray-chart .panel-bg { fill: #111; }' +
+		'.firespray-chart .axis-y line { stroke: #111; }' +
+		'.firespray-chart  text { font-size: 10px; fill: #aaa; }' +
+		'.firespray-chart  .hovered-geometry, .hover-guide-x{ stroke: #555; }' +
+		'.firespray-chart  .domain{ display: none}'
 };
