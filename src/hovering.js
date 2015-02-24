@@ -9,6 +9,27 @@ fy.setupHovering = function( config, cache ) {
 
 	var that = this;
 
+	var scrollAccum = 0;
+	var mouseAccum = 0;
+	var zoomSpeed = 10;
+	var panSpeed = 1000;
+
+	function computeNewExtent() {
+		var sampleWidthInPx = fy.graphicUtils.sampleWidthInPx( cache );
+		var extentX = fy.dataUtils.computeExtent( cache, 'x' );
+
+		var newExtentX = [];
+		newExtentX[0] = extentX[0] - (zoomSpeed * scrollAccum) - (panSpeed * mouseAccum / sampleWidthInPx);
+		newExtentX[1] = extentX[1] + (zoomSpeed * scrollAccum) - (panSpeed * mouseAccum / sampleWidthInPx);
+
+		if ( (newExtentX[1] - newExtentX[0]) >= 1001 ) {
+			return newExtentX;
+		}
+		else {
+			return;
+		}
+	}
+
 	var mouseIsPressed = false;
 	document.onmousedown = function() {
 		mouseIsPressed = true;
@@ -17,7 +38,11 @@ fy.setupHovering = function( config, cache ) {
 		mouseIsPressed = false;
 	};
 	d3.select( document ).on( 'mousewheel', function() {
-		cache.dispatch.mouseWheelScroll.call( that, d3.event.wheelDelta, fy.graphicUtils.sampleWidthInPx( cache ) );
+		scrollAccum += d3.event.wheelDelta;
+
+		var newExtentX = computeNewExtent();
+
+		cache.dispatch.mouseWheelScroll.call( that, newExtentX );
 	} );
 
 	cache.interactionSvg.select( '.hover-rect' )
@@ -28,11 +53,16 @@ fy.setupHovering = function( config, cache ) {
 			var mouseX = d3.mouse( this )[0];
 
 			if ( mouseIsPressed ) {
-				cache.dispatch.mouseDragMove.call( that, d3.event.movementX, fy.graphicUtils.sampleWidthInPx( cache ) );
+				mouseAccum += d3.event.movementX;
+
+				var newExtentX = computeNewExtent();
+
+				cache.dispatch.mouseDragMove.call( that, newExtentX );
 			}
 
 			var closestPointsScaledX = fy._hovering.injectClosestPointsFromX( mouseX, config, cache );
 			cache.interactionSvg.select( '.hover-group' ).style( {visibility: 'visible'} );
+
 			if ( typeof closestPointsScaledX !== 'undefined' ) {
 				fy._hovering.displayHoveredGeometry( config, cache );
 				cache.dispatch.chartHover.call( that, cache.data );
@@ -42,6 +72,7 @@ fy.setupHovering = function( config, cache ) {
 				fy._hovering.hideHoveredGeometry( config, cache );
 				fy._hovering.displayVerticalGuide( mouseX, config, cache );
 			}
+
 		} )
 		.on( 'mouseenter', function() {
 			cache.dispatch.chartEnter.call( that );
@@ -49,11 +80,13 @@ fy.setupHovering = function( config, cache ) {
 		.on( 'mouseout', function() {
 			var svg = cache.interactionSvg.node();
 			var target = d3.event.relatedTarget;
+
 			if ( (svg.contains && !svg.contains( target )) ||
 				(svg.compareDocumentPosition && !svg.compareDocumentPosition( target )) ) {
 				cache.interactionSvg.select( '.hover-group' ).style( {visibility: 'hidden'} );
 				cache.dispatch.chartOut.call( that );
 			}
+
 		} )
 		.select( '.hover-group' );
 

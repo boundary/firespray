@@ -17,7 +17,7 @@
 	<script src="../src/containers.js"></script>
 	<script src="../src/geometries.js"></script>
 	<style>
-		body{
+		body {
 			height: 100%;
 			overflow: hidden;
 		}
@@ -29,59 +29,30 @@
 
 <script>
 
-/*
-todo:
--1001 hardcoded
--pixel to zoom (dragging when zoomed should pan slower) hardcoded limits
--stripes
--zoom from mouse instead of center
- */
+	/*
+	 todo:
+	 -stripes
+	 -zoom from mouse instead of center
+	 */
 
-	var data = firespray.dataUtils.generateData({pointCount: 200, lineCount: 5});
-
-	var scrollAccum = 0;
-	var mouseAccum = 0;
-	var zoomSpeed = 10;
-	var panSpeed = 1000;
+	var data = firespray.dataUtils.generateData( {pointCount: 200, lineCount: 5} );
 
 	var chart = firespray.chart()
-		.setConfig({
-			container: document.querySelector('.chart1'),
+		.setConfig( {
+			container: document.querySelector( '.chart1' ),
 			width: 600,
 			height: 400,
 			theme: 'default',
 			stripeWidthInSample: 1,
 			geometryType: 'line'
-		})
-		.setData(data)
-		.on('mouseDragMove', function(movementX, sampleWidthInPx){
-			var data = chart.getDataExtent().x;
-
-			mouseAccum += movementX;
-
-			var newData = [];
-			newData[0] = data[0] - (zoomSpeed * scrollAccum) - (panSpeed * mouseAccum / sampleWidthInPx);
-			newData[1] = data[1] + (zoomSpeed * scrollAccum) - (panSpeed * mouseAccum / sampleWidthInPx);
-
-			chart.setZoom(newData);
-		})
-		.on('mouseWheelScroll', function(scroll, sampleWidthInPx){
-			var data = chart.getDataExtent().x;
-
-			scrollAccum += scroll;
-
-			var newData = [];
-			newData[0] = data[0] - (zoomSpeed * scrollAccum) - (panSpeed * mouseAccum / sampleWidthInPx);
-			newData[1] = data[1] + (zoomSpeed * scrollAccum) - (panSpeed * mouseAccum / sampleWidthInPx);
-
-			if((newData[1] - newData[0]) >= 1001){
-				chart.setZoom(newData);
-			}
-			else{
-				scrollAccum -= scroll;
-			}
-
-		});
+		} )
+		.setData( data )
+		.on( 'mouseDragMove', function( newExtentX ) {
+			chart.setZoom( newExtentX );
+		} )
+		.on( 'mouseWheelScroll', function( newExtentX ) {
+			chart.setZoom( newExtentX );
+		} );
 
 </script>
 </body>
