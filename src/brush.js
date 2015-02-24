@@ -1,14 +1,14 @@
 // Brush
 ///////////////////////////////////////////////////////////
-firespray.setupBrush = function( config, cache ) {
+fy.setupBrush = function( config, cache ) {
 	if ( !config.useBrush || cache.brush ) {
 		return cache;
 	}
 
 	cache.brush = d3.svg.brush();
 
-	var brushChange = firespray.utils.throttle( cache.dispatch.brushChange, config.brushThrottleWaitDuration );
-	var brushDragMove = firespray.utils.throttle( cache.dispatch.brushDragMove, config.brushThrottleWaitDuration );
+	var brushChange = fy.utils.throttle( cache.dispatch.brushChange, config.brushThrottleWaitDuration );
+	var brushDragMove = fy.utils.throttle( cache.dispatch.brushDragMove, config.brushThrottleWaitDuration );
 
 	cache.brushExtent = cache.brushExtent || cache.scaleX.domain();
 	cache.brush.x( cache.scaleX )

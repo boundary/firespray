@@ -1,6 +1,6 @@
 // Static default config
 ///////////////////////////////////////////////////////////
-firespray.defaultConfig = {
+fy.defaultConfig = {
 	scaleX: 'time', // linear, time
 	width: 500,
 	height: 300,

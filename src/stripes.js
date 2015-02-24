@@ -1,12 +1,13 @@
 // Stripes
 ///////////////////////////////////////////////////////////
-firespray.setupStripes = function( config, cache ) {
-	if ( !config.showStripes || !firespray.dataUtils.hasValidData( cache ) ) {
+fy.setupStripes = function( config, cache ) {
+
+	if ( !config.showStripes || !fy.dataUtils.hasValidData( cache ) ) {
 		return this;
 	}
 
 	// stripes
-	var stripeW = firespray.dataUtils.sampleWidthInPx( cache );
+	var stripeW = fy.dataUtils.sampleWidthInPx( cache );
 
 	var stripCount = Math.round( cache.chartW / stripeW );
 
@@ -29,4 +30,5 @@ firespray.setupStripes = function( config, cache ) {
 	stripesSelection.exit().remove();
 
 	return cache;
+
 };

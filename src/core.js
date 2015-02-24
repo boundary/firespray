@@ -1,11 +1,13 @@
 var firespray = {version: '0.1.2'};
+var fy = firespray;
 
-firespray.chart = function module() {
+fy.chart = function module() {
+
 	var that = this;
 
 	// Configuration and cached variables
 	///////////////////////////////////////////////////////////
-	var config = firespray.utils.cloneJSON( firespray.defaultConfig );
+	var config = fy.utils.cloneJSON( fy.defaultConfig );
 	var cache = {
 		data: [],
 		root: null,
@@ -31,23 +33,23 @@ firespray.chart = function module() {
 		'geometryHover', 'geometryOut', 'geometryClick', 'chartHover', 'chartOut', 'chartEnter',
 		'mouseDragMove', 'mouseWheelScroll' );
 
-	var pipeline = firespray.utils.pipeline(
-		firespray.setupContainers,
-		firespray.setupScales,
-		firespray.setupAxisY,
-		firespray.setupAxisX,
-		firespray.setupBrush,
-		firespray.setupHovering,
-		firespray.setupStripes,
-		firespray.setupGeometries
+	var renderPipeline = fy.utils.pipeline(
+		fy.setupContainers,
+		fy.setupScales,
+		fy.setupAxisY,
+		fy.setupAxisX,
+		fy.setupBrush,
+		fy.setupHovering,
+		fy.setupStripes,
+		fy.setupGeometries
 	);
 
-	var pipeline2 = firespray.utils.pipeline(
-		firespray.setupScales,
-		firespray.setupAxisY,
-		firespray.setupAxisX,
-		firespray.setupStripes,
-		firespray.setupGeometries
+	var updatePipeline = fy.utils.pipeline(
+		fy.setupScales,
+		fy.setupAxisY,
+		fy.setupAxisX,
+		fy.setupStripes,
+		fy.setupGeometries
 	);
 
 	// Public methods
@@ -55,18 +57,18 @@ firespray.chart = function module() {
 	var exports = {
 
 		render: function() {
-			pipeline( config, cache );
+			renderPipeline( config, cache );
 		},
 
 		update: function() {
-			pipeline2( config, cache );
+			updatePipeline( config, cache );
 		},
 
 		setData: function( _newData ) {
 			if ( !_newData || _newData.length === 0 || _newData[0].values.length === 0 ) {
 				return this;
 			}
-			cache.data = firespray.utils.cloneJSON( _newData );
+			cache.data = fy.utils.cloneJSON( _newData );
 			cache.data.sort( function( a, b ) { // sort by data.values.length, useful for searching hovered dots by the longest dataset first
 				var x = a.values.length;
 				var y = b.values.length;
@@ -78,7 +80,7 @@ firespray.chart = function module() {
 		},
 
 		setConfig: function( _newConfig ) {
-			firespray.utils.override( _newConfig, config );
+			fy.utils.override( _newConfig, config );
 			return this;
 		},
 
@@ -90,7 +92,7 @@ firespray.chart = function module() {
 		},
 
 		getDataSlice: function( _sliceExtentX ) {
-			var dataSlice = firespray.utils.cloneJSON( cache.data )
+			var dataSlice = fy.utils.cloneJSON( cache.data )
 				.map( function( d ) {
 					d.values = d.values.filter( function( dB ) {
 						return dB.x >= _sliceExtentX[0] && dB.x <= _sliceExtentX[1];
@@ -116,7 +118,7 @@ firespray.chart = function module() {
 		},
 
 		getZoomExtent: function() {
-			return config.zoomedExtentX || firespray.dataUtils.computeExtent( cache.data, 'x' );
+			return config.zoomedExtentX || fy.dataUtils.computeExtent( cache.data, 'x' );
 		},
 
 		setBrushSelection: function( _brushSelectionExtent ) {
@@ -128,20 +130,20 @@ firespray.chart = function module() {
 		},
 
 		setHovering: function( _dateX ) {
-			if ( !firespray.dataUtils.hasValidData( cache ) ) {
+			if ( !fy.dataUtils.hasValidData( cache ) ) {
 				return;
 			}
 			var hoverPosX = cache.scaleX( _dateX );
 
-			var closestPointsScaledX = firespray._hovering.injectClosestPointsFromX( hoverPosX, config, cache );
+			var closestPointsScaledX = fy._hovering.injectClosestPointsFromX( hoverPosX, config, cache );
 			cache.interactionSvg.select( '.hover-group' ).style( {visibility: 'visible'} );
 			if ( typeof closestPointsScaledX !== 'undefined' ) {
-				firespray._hovering.displayHoveredGeometry( config, cache );
-				firespray._hovering.displayVerticalGuide( closestPointsScaledX, config, cache );
+				fy._hovering.displayHoveredGeometry( config, cache );
+				fy._hovering.displayVerticalGuide( closestPointsScaledX, config, cache );
 			}
 			else {
-				firespray._hovering.hideHoveredGeometry( config, cache );
-				firespray._hovering.displayVerticalGuide( hoverPosX, config, cache );
+				fy._hovering.hideHoveredGeometry( config, cache );
+				fy._hovering.displayVerticalGuide( hoverPosX, config, cache );
 			}
 
 			return this;
@@ -162,7 +164,7 @@ firespray.chart = function module() {
 		},
 
 		getDataExtent: function() {
-			return firespray.dataUtils.computeExtent( cache.data, 'x' );
+			return fy.dataUtils.computeExtent( cache.data, 'x' );
 		},
 
 		getDataPointCount: function() {
@@ -202,8 +204,9 @@ firespray.chart = function module() {
 	d3.rebind( exports, cache.dispatch, "on" );
 
 	return exports;
+
 };
 //
-//if (typeof define === "function" && define.amd) {define(function() {return firespray;}); }
-//else if (typeof module === "object" && module.exports){module.exports = firespray;}
-//this.firespray = firespray;
+//if (typeof define === "function" && define.amd) {define(function() {return fy;}); }
+//else if (typeof module === "object" && module.exports){module.exports = fy;}
+//this.fy = fy;

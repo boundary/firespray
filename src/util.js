@@ -1,6 +1,7 @@
 // Static utilities
 ///////////////////////////////////////////////////////////
-firespray.utils = {
+fy.utils = {
+
 	override: function( _objA, _objB ) {
 		for ( var x in _objA ) {
 			if ( x in _objB ) {
@@ -8,9 +9,11 @@ firespray.utils = {
 			}
 		}
 	},
+
 	cloneJSON: function( _obj ) {
 		return JSON.parse( JSON.stringify( _obj ) );
 	},
+
 	throttle: function throttle( callback, limit, b ) {
 		var wait = false;
 		var timer = null;
@@ -25,6 +28,7 @@ firespray.utils = {
 			}
 		};
 	},
+
 	deepExtend: function( destination, source ) {
 		for ( var property in source ) {
 			if ( source[property] && source[property].constructor &&
@@ -37,6 +41,7 @@ firespray.utils = {
 		}
 		return destination;
 	},
+
 	pipeline: function() {
 		var fns = arguments;
 		return function( config, cache ) {
@@ -46,9 +51,11 @@ firespray.utils = {
 			return cache;
 		};
 	}
+
 };
 
-firespray.dataUtils = {
+fy.dataUtils = {
+
 	generateDataPoint: function( options, i ) {
 		var point = {
 			x: options.epoch,
@@ -59,6 +66,7 @@ firespray.dataUtils = {
 		}
 		return point;
 	},
+
 	generateDataLine: function( options, i ) {
 		var pointCount = options.pointCount || 1000;
 		var colors = d3.scale.category20().range();
@@ -66,22 +74,25 @@ firespray.dataUtils = {
 		return {
 			values: d3.range( pointCount ).map( function( dB, iB ) {
 				options.epoch += 1000;
-				return firespray.dataUtils.generateDataPoint( options );
+				return fy.dataUtils.generateDataPoint( options );
 			} ),
 			"color": colors[i % (colors.length - 1)],
 			"name": "line i"
 		};
 	},
+
 	generateData: function( options ) {
 		options.startEpoch = new Date().setMilliseconds( 0 );
 		var lineCount = options.lineCount || 5;
 		return d3.range( lineCount ).map( function( d, i ) {
-			return firespray.dataUtils.generateDataLine( options, i );
+			return fy.dataUtils.generateDataLine( options, i );
 		} );
 	},
+
 	hasValidData: function( cache ) {
 		return (cache.data && cache.data.length !== 0 && cache.data[0].values.length !== 0);
 	},
+
 	hasValidDataY2: function( cache ) {
 		if ( this.hasValidData( cache ) && typeof cache.data[0].values[0].y2 === 'number' ) {
 			return !!cache.data[0].values[0];
@@ -90,6 +101,7 @@ firespray.dataUtils = {
 			return false;
 		}
 	},
+
 	computeExtent: function( _data, _axis ) {
 		return d3.extent( d3.merge( _data.map( function( d ) {
 			return d.values.map( function( dB ) {
@@ -97,7 +109,9 @@ firespray.dataUtils = {
 			} );
 		} ) ) );
 	},
+
 	sampleWidthInPx: function( cache ) {
 		return cache.scaleX( cache.data[0].values[2].x ) - cache.scaleX( cache.data[1].values[1].x );
 	}
+
 };

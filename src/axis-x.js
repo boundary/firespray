@@ -1,6 +1,6 @@
 // X axis
 ///////////////////////////////////////////////////////////
-firespray.setupAxisX = function( config, cache ) {
+fy.setupAxisX = function( config, cache ) {
 
 	if ( !config.showAxisX ) {
 		return cache;

@@ -1,23 +1,23 @@
 // Scales
 ///////////////////////////////////////////////////////////
-firespray.setupScales = function( config, cache ) {
+fy.setupScales = function( config, cache ) {
 
 	setupScaleX();
 	setupScaleY();
 
 	function setupScaleX() {
-		var extentX = config.zoomedExtentX || firespray.dataUtils.computeExtent( cache.data, 'x' );
+		var extentX = config.zoomedExtentX || fy.dataUtils.computeExtent( cache.data, 'x' );
 		//TODO scaleX.range?
 		cache.scaleX.domain( extentX );
 		cache.extentX = extentX;
 	}
 
 	function setupScaleY() {
-		var extentY = firespray.dataUtils.computeExtent( cache.data, 'y' );
+		var extentY = fy.dataUtils.computeExtent( cache.data, 'y' );
 
 		cache.biggestY = 'y';
-		if ( cache.isMirror !== false && firespray.dataUtils.hasValidDataY2( cache ) ) {
-			var extentY2 = firespray.dataUtils.computeExtent( cache.data, 'y2' );
+		if ( cache.isMirror !== false && fy.dataUtils.hasValidDataY2( cache ) ) {
+			var extentY2 = fy.dataUtils.computeExtent( cache.data, 'y2' );
 			if ( (extentY2[1] > extentY[1]) ) {
 				cache.biggestY = 'y2';
 			}
@@ -54,4 +54,5 @@ firespray.setupScales = function( config, cache ) {
 	}
 
 	return cache;
+
 };

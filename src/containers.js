@@ -1,6 +1,6 @@
 // Containers
 ///////////////////////////////////////////////////////////
-firespray.setupContainers = function( config, cache ) {
+fy.setupContainers = function( config, cache ) {
 
 	if ( !config.container ) {
 		throw 'A container is needed';
@@ -10,9 +10,9 @@ firespray.setupContainers = function( config, cache ) {
 	if ( !cache.root && config.container ) {
 		var container = d3.select( config.container ).append( 'div' );
 
-		container.html( firespray.template );
+		container.html( fy.template );
 
-		cache.root = container.style( {position: 'absolute'} ).classed( 'chart firespray-chart', true );
+		cache.root = container.style( {position: 'absolute'} ).classed( 'chart fy-chart', true );
 		cache.bgSvg = cache.root.select( 'svg.bg' );
 		cache.axesSvg = cache.root.select( 'svg.axes' );
 		cache.interactionSvg = cache.root.select( 'svg.interaction' ).attr( {id: Math.random()} );
@@ -52,7 +52,7 @@ firespray.setupContainers = function( config, cache ) {
 	cache.bgSvg.select( '.axis-x-bg' ).attr( {width: cache.chartW, height: cache.axisXHeight, y: cache.chartH} );
 
 	if ( config.geometryType === 'line' ) {
-		cache.isMirror = (typeof config.isMirror === 'boolean') ? config.isMirror : firespray.dataUtils.hasValidDataY2( cache );
+		cache.isMirror = (typeof config.isMirror === 'boolean') ? config.isMirror : fy.dataUtils.hasValidDataY2( cache );
 	}
 	else {
 		cache.isMirror = false;
@@ -60,9 +60,10 @@ firespray.setupContainers = function( config, cache ) {
 
 	if ( config.theme !== cache.theme ) {
 		cache.root.select( 'style' ).remove();
-		cache.root.append( 'style' ).html( firespray.themes[config.theme] );
+		cache.root.append( 'style' ).html( fy.themes[config.theme] );
 		cache.theme = config.theme;
 	}
 
 	return cache;
+
 };

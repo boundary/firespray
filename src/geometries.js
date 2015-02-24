@@ -1,46 +1,51 @@
 // Geometry
 ///////////////////////////////////////////////////////////
 
-firespray.setupGeometries = function( config, cache ) {
+fy.setupGeometries = function( config, cache ) {
 
-	firespray._computeGeometryData( config, cache );
+	fy._computeGeometryData( config, cache );
 
 	if ( config.geometryType === 'line' ||
 		config.geometryType === 'stackedLine' ||
 		config.geometryType === 'stackedArea' ) {
-		firespray.setupLineGeometry( config, cache );
+		fy.setupLineGeometry( config, cache );
 	}
 	else if ( config.geometryType === 'bar' ||
 		config.geometryType === 'percentBar' ||
 		config.geometryType === 'stackedBar' ) {
-		firespray.setupBarGeometry( config, cache );
+		fy.setupBarGeometry( config, cache );
 	}
 
 	return cache;
+
 };
 
-firespray.setupBarGeometry = function( config, cache ) {
+fy.setupBarGeometry = function( config, cache ) {
+
 	if ( config.renderer === 'canvas' ) {
-		firespray._renderBarGeometry( config, cache );
+		fy._renderBarGeometry( config, cache );
 	}
 	else {
-		firespray._renderBarGeometrySVG( config, cache );
+		fy._renderBarGeometrySVG( config, cache );
 	}
+
 };
 
-firespray.setupLineGeometry = function( config, cache ) {
+fy.setupLineGeometry = function( config, cache ) {
+
 	if ( config.renderer === 'canvas' ) {
-		firespray._renderLineGeometry( config, cache );
+		fy._renderLineGeometry( config, cache );
 	}
 	else if ( config.geometryType === 'stackedArea' ) {
-		firespray._renderAreaGeometrySVG( config, cache );
+		fy._renderAreaGeometrySVG( config, cache );
 	}
 	else {
-		firespray._renderLineGeometrySVG( config, cache );
+		fy._renderLineGeometrySVG( config, cache );
 	}
+
 };
 
-firespray._computeGeometryData = function( config, cache ) {
+fy._computeGeometryData = function( config, cache ) {
 
 	if ( cache.isMirror ) {
 		cache.scaleY.range( [cache.chartH / 2, 0] );
@@ -121,7 +126,7 @@ firespray._computeGeometryData = function( config, cache ) {
 
 };
 
-firespray._renderAreaGeometrySVG = function( config, cache ) {
+fy._renderAreaGeometrySVG = function( config, cache ) {
 
 	// area geometry SVG
 	cache.geometrySVG.attr( {
@@ -162,7 +167,7 @@ firespray._renderAreaGeometrySVG = function( config, cache ) {
 
 };
 
-firespray._renderLineGeometrySVG = function( config, cache ) {
+fy._renderLineGeometrySVG = function( config, cache ) {
 
 	// line geometry SVG
 	cache.geometrySVG.attr( {
@@ -198,7 +203,7 @@ firespray._renderLineGeometrySVG = function( config, cache ) {
 
 };
 
-firespray._renderLineGeometry = function( config, cache ) {
+fy._renderLineGeometry = function( config, cache ) {
 
 	// line geometry canvas
 	cache.geometryCanvas.attr( {
@@ -248,9 +253,10 @@ firespray._renderLineGeometry = function( config, cache ) {
 			} );
 		} );
 	}
+
 };
 
-firespray._renderBarGeometrySVG = function( config, cache ) {
+fy._renderBarGeometrySVG = function( config, cache ) {
 
 	// bar geometry SVG
 	cache.geometrySVG
@@ -297,7 +303,7 @@ firespray._renderBarGeometrySVG = function( config, cache ) {
 
 };
 
-firespray._renderBarGeometry = function( config, cache ) {
+fy._renderBarGeometry = function( config, cache ) {
 
 	// bar geometry canvas
 	cache.geometryCanvas.attr( {
@@ -337,4 +343,5 @@ firespray._renderBarGeometry = function( config, cache ) {
 			} );
 		} );
 	}
+	
 };

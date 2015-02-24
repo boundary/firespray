@@ -1,6 +1,6 @@
 // Y axis
 ///////////////////////////////////////////////////////////
-firespray.setupAxisY = function( config, cache ) {
+fy.setupAxisY = function( config, cache ) {
 
 	if ( !config.showAxisY ) {
 		return cache;

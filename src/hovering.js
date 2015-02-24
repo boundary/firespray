@@ -1,6 +1,6 @@
 // Hovering
 ///////////////////////////////////////////////////////////
-firespray.setupHovering = function( config, cache ) {
+fy.setupHovering = function( config, cache ) {
 
 	if ( config.useBrush ) {
 		return cache;
@@ -15,30 +15,30 @@ firespray.setupHovering = function( config, cache ) {
 		mouseIsPressed = false;
 	};
 	d3.select( document ).on( 'mousewheel', function() {
-		cache.dispatch.mouseWheelScroll.call( that, d3.event.wheelDelta, firespray.dataUtils.sampleWidthInPx( cache ) );
+		cache.dispatch.mouseWheelScroll.call( that, d3.event.wheelDelta, fy.dataUtils.sampleWidthInPx( cache ) );
 	} );
 
 	cache.interactionSvg.select( '.hover-rect' )
 		.on( 'mousemove', function() {
-			if ( !firespray.dataUtils.hasValidData( cache ) ) {
+			if ( !fy.dataUtils.hasValidData( cache ) ) {
 				return;
 			}
 			var mouseX = d3.mouse( this )[0];
 
 			if ( mouseIsPressed ) {
-				cache.dispatch.mouseDragMove.call( that, d3.event.movementX, firespray.dataUtils.sampleWidthInPx( cache ) );
+				cache.dispatch.mouseDragMove.call( that, d3.event.movementX, fy.dataUtils.sampleWidthInPx( cache ) );
 			}
 
-			var closestPointsScaledX = firespray._hovering.injectClosestPointsFromX( mouseX, config, cache );
+			var closestPointsScaledX = fy._hovering.injectClosestPointsFromX( mouseX, config, cache );
 			cache.interactionSvg.select( '.hover-group' ).style( {visibility: 'visible'} );
 			if ( typeof closestPointsScaledX !== 'undefined' ) {
-				firespray._hovering.displayHoveredGeometry( config, cache );
+				fy._hovering.displayHoveredGeometry( config, cache );
 				cache.dispatch.chartHover.call( that, cache.data );
-				firespray._hovering.displayVerticalGuide( closestPointsScaledX, config, cache );
+				fy._hovering.displayVerticalGuide( closestPointsScaledX, config, cache );
 			}
 			else {
-				firespray._hovering.hideHoveredGeometry( config, cache );
-				firespray._hovering.displayVerticalGuide( mouseX, config, cache );
+				fy._hovering.hideHoveredGeometry( config, cache );
+				fy._hovering.displayVerticalGuide( mouseX, config, cache );
 			}
 		} )
 		.on( 'mouseenter', function() {
@@ -58,7 +58,7 @@ firespray.setupHovering = function( config, cache ) {
 	return cache;
 };
 
-firespray._hovering = {
+fy._hovering = {
 
 	injectClosestPointsFromX: function( fromPointX, config, cache ) {
 		var found = false, closestIndex, closestScaledX;
@@ -85,10 +85,10 @@ firespray._hovering = {
 		if ( config.geometryType === 'bar' ||
 			config.geometryType === 'percentBar' ||
 			config.geometryType === 'stackedBar' ) {
-			firespray._hovering.displayHoveredRects( config, cache );
+			fy._hovering.displayHoveredRects( config, cache );
 		}
 		else {
-			firespray._hovering.displayHoveredDots( config, cache );
+			fy._hovering.displayHoveredDots( config, cache );
 		}
 	},
 
@@ -228,4 +228,5 @@ firespray._hovering = {
 			.style( {'pointer-events': 'none'} );
 		return this;
 	}
+
 };
