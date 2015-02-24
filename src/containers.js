@@ -52,7 +52,7 @@ firespray.setupContainers = function(config, cache){
 	cache.bgSvg.select('.axis-x-bg').attr({width: cache.chartW, height: cache.axisXHeight, y: cache.chartH});
 
 	if(config.geometryType === 'line'){
-		cache.isMirror = (typeof config.isMirror === 'boolean') ? config.isMirror : firespray.convenience.hasValidDataY2(cache);
+		cache.isMirror = (typeof config.isMirror === 'boolean') ? config.isMirror : firespray.dataUtils.hasValidDataY2(cache);
 	}
 	else{ cache.isMirror = false; }
 

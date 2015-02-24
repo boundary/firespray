@@ -81,7 +81,7 @@ firespray.chart = function module() {
 		},
 
 		refresh: function () {
-			if(that.convenience.hasValidData(cache)) {this.render();}
+			if(that.dataUtils.hasValidData(cache)) {this.render();}
 			return this;
 		},
 
@@ -100,15 +100,19 @@ firespray.chart = function module() {
 			return exports.getDataSlice(exports.getBrushExtent());
 		},
 
+		getDataInView: function(){
+			console.log(this.getZoomExtent, exports.getZoomExtent);
+			return exports.getDataSlice(exports.getZoomExtent());
+		},
+
 		setZoom: function (_newExtent) {
 			config.zoomedExtentX = _newExtent;
 			this.update();
 			return this;
 		},
 
-		getZoomExtent: function (_newExtent) {
-			var extentX = config.zoomedExtentX || firespray.convenience.computeExtent(cache.data, 'x');
-			return extentX;
+		getZoomExtent: function () {
+			return config.zoomedExtentX || firespray.dataUtils.computeExtent(cache.data, 'x');
 		},
 
 		setBrushSelection: function (_brushSelectionExtent) {
@@ -120,7 +124,7 @@ firespray.chart = function module() {
 		},
 
 		setHovering: function(_dateX){
-			if(!firespray.convenience.hasValidData(cache)) {return;}
+			if(!firespray.dataUtils.hasValidData(cache)) {return;}
 			var hoverPosX = cache.scaleX(_dateX);
 
 			var closestPointsScaledX = firespray._hovering.injectClosestPointsFromX(hoverPosX, config, cache);
@@ -146,14 +150,11 @@ firespray.chart = function module() {
 		},
 
 		getDataExtent: function () {
-			return firespray.convenience.computeExtent(cache.data, 'x');
-//			if(cache.extentX && cache.extentX) {
-//				return {x: cache.extentX.map(function(d){ return d; }), y: cache.extentY};
-//			}
+			return firespray.dataUtils.computeExtent(cache.data, 'x');
 		},
 
 		getDataPointCount: function () {
-			return cache.data[0].values;
+			return cache.data[0].values.length;
 		},
 
 		getDataPointCountInView: function () {

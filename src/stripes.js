@@ -1,10 +1,11 @@
 // Stripes
 ///////////////////////////////////////////////////////////
 firespray.setupStripes = function(config, cache){
-	if(!config.showStripes || !firespray.convenience.hasValidData(cache)) {return this;}
+	if(!config.showStripes || !firespray.dataUtils.hasValidData(cache)) {return this;}
 
 	// stripes
-	var stripeW = cache.scaleX(cache.data[0].values[1].x) * config.stripeWidthInSample;
+	var stripeW = firespray.dataUtils.sampleWidthInPx(cache);
+
 	var stripCount = Math.round(cache.chartW / stripeW);
 
 	var stripesSelection = cache.bgSvg.select('.background').selectAll('rect.stripe')

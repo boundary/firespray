@@ -37,10 +37,12 @@ todo:
 -zoom from mouse instead of center
  */
 
-	var data = firespray.utils.generateData({pointCount: 200, lineCount: 5});
+	var data = firespray.dataUtils.generateData({pointCount: 200, lineCount: 5});
 
 	var scrollAccum = 0;
 	var mouseAccum = 0;
+	var zoomSpeed = 10;
+	var panSpeed = 1000;
 
 	var chart = firespray.chart()
 		.setConfig({
@@ -52,28 +54,25 @@ todo:
 			geometryType: 'line'
 		})
 		.setData(data)
-		.on('mouseDragMove', function(movementX){
+		.on('mouseDragMove', function(movementX, sampleWidthInPx){
 			var data = chart.getDataExtent();
 
 			mouseAccum += movementX;
 
-			var zoom = -(10 * scrollAccum)/100000;
-			var mult = 400 - zoom * 400 + 2;
-
 			var newData = [];
-			newData[0] = (data[0] - mult * mouseAccum) - 10 * scrollAccum;
-			newData[1] = (data[1] - mult * mouseAccum) + 10 * scrollAccum;
+			newData[0] = data[0] - (zoomSpeed * scrollAccum) - (panSpeed * mouseAccum / sampleWidthInPx);
+			newData[1] = data[1] + (zoomSpeed * scrollAccum) - (panSpeed * mouseAccum / sampleWidthInPx);
 
 			chart.setZoom(newData);
 		})
-		.on('mouseWheelScroll', function(scroll){
+		.on('mouseWheelScroll', function(scroll, sampleWidthInPx){
 			var data = chart.getDataExtent();
 
 			scrollAccum += scroll;
 
 			var newData = [];
-			newData[0] = (data[0] - 200 * mouseAccum) - 10 * scrollAccum;
-			newData[1] = (data[1] - 200 * mouseAccum) + 10 * scrollAccum;
+			newData[0] = data[0] - (zoomSpeed * scrollAccum) - (panSpeed * mouseAccum / sampleWidthInPx);
+			newData[1] = data[1] + (zoomSpeed * scrollAccum) - (panSpeed * mouseAccum / sampleWidthInPx);
 
 			if((newData[1] - newData[0]) >= 1001){
 				chart.setZoom(newData);

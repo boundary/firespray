@@ -6,18 +6,18 @@ firespray.setupScales = function(config, cache){
 	setupScaleY();
 
 	function setupScaleX(){
-		var extentX = config.zoomedExtentX || firespray.convenience.computeExtent(cache.data, 'x');
+		var extentX = config.zoomedExtentX || firespray.dataUtils.computeExtent(cache.data, 'x');
 		//TODO scaleX.range?
 		cache.scaleX.domain(extentX);
 		cache.extentX = extentX;
 	}
 
 	function setupScaleY(){
-		var extentY = firespray.convenience.computeExtent(cache.data, 'y');
+		var extentY = firespray.dataUtils.computeExtent(cache.data, 'y');
 
 		cache.biggestY = 'y';
-		if(cache.isMirror !== false && firespray.convenience.hasValidDataY2(cache)) {
-			var extentY2 = firespray.convenience.computeExtent(cache.data, 'y2');
+		if(cache.isMirror !== false && firespray.dataUtils.hasValidDataY2(cache)) {
+			var extentY2 = firespray.dataUtils.computeExtent(cache.data, 'y2');
 			if((extentY2[1] > extentY[1])) {cache.biggestY = 'y2';}
 			extentY = [Math.min(extentY[0], extentY2[0]), Math.max(extentY[1], extentY2[1])];
 		}

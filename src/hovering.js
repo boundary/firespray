@@ -13,16 +13,16 @@ firespray.setupHovering = function(config, cache) {
 		mouseIsPressed = false;
 	};
 	d3.select(document).on('mousewheel', function(){
-		cache.dispatch.mouseWheelScroll.call(that, d3.event.wheelDelta);
+		cache.dispatch.mouseWheelScroll.call(that, d3.event.wheelDelta, firespray.dataUtils.sampleWidthInPx(cache));
 	});
 
 	cache.interactionSvg.select('.hover-rect')
 		.on('mousemove', function () {
-			if(!firespray.convenience.hasValidData(cache)) {return;}
+			if(!firespray.dataUtils.hasValidData(cache)) {return;}
 			var mouseX = d3.mouse(this)[0];
 
 			if(mouseIsPressed){
-				cache.dispatch.mouseDragMove.call(that, d3.event.movementX);
+				cache.dispatch.mouseDragMove.call(that, d3.event.movementX, firespray.dataUtils.sampleWidthInPx(cache));
 			}
 
 			var closestPointsScaledX = firespray._hovering.injectClosestPointsFromX(mouseX, config, cache);

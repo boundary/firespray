@@ -5,11 +5,13 @@ firespray.utils = {
 	cloneJSON: function(_obj){ return JSON.parse(JSON.stringify(_obj)); },
 	throttle: function throttle (callback, limit, b) {
 		var wait = false;
+		var timer = null;
 		return function (a, b) {
 			if (!wait) {
 				callback.apply(this, arguments);
 				wait = true;
-				setTimeout(function(){wait = false;}, limit);
+				clearTimeout(timer);
+				timer = setTimeout(function(){wait = false;}, limit);
 			}
 		};
 	},
@@ -33,7 +35,10 @@ firespray.utils = {
 			}
 			return cache;
 		};
-	},
+	}
+};
+
+firespray.dataUtils = {
 	generateDataPoint: function(options, i){
 		var point = {
 				x: options.epoch,
@@ -49,7 +54,7 @@ firespray.utils = {
 		return {
 			values: d3.range(pointCount).map(function(dB, iB){
 				options.epoch += 1000;
-				return firespray.utils.generateDataPoint(options);
+				return firespray.dataUtils.generateDataPoint(options);
 			}),
 			"color": colors[i%(colors.length-1)],
 			"name": "line i"
@@ -59,24 +64,20 @@ firespray.utils = {
 		options.startEpoch = new Date().setMilliseconds(0);
 		var lineCount = options.lineCount || 5;
 		return d3.range(lineCount).map(function(d, i){
-			return firespray.utils.generateDataLine(options, i);
+			return firespray.dataUtils.generateDataLine(options, i);
 		});
-	}
-};
-
-// Convenience functions
-///////////////////////////////////////////////////////////
-firespray.convenience = {
+	},
 	hasValidData: function(cache){
 		return (cache.data && cache.data.length !== 0 && cache.data[0].values.length !== 0);
 	},
-
 	hasValidDataY2: function(cache){
 		if(this.hasValidData(cache) && typeof cache.data[0].values[0].y2 === 'number') {return !!cache.data[0].values[0];}
 		else {return false;}
 	},
-
 	computeExtent: function(_data, _axis) {
 		return d3.extent(d3.merge(_data.map(function(d){ return d.values.map(function(dB){ return dB[_axis]; }); })));
+	},
+	sampleWidthInPx: function(cache){
+		return cache.scaleX(cache.data[0].values[2].x) - cache.scaleX(cache.data[1].values[1].x);
 	}
 };
