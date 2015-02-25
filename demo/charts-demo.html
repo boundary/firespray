@@ -19,7 +19,7 @@
 	<script src="../src/containers.js"></script>
 	<script src="../src/geometries.js"></script>
 	<style>
-		.container{
+		.container {
 			float: left;
 			height: 400px;
 			padding: 10px;
@@ -38,27 +38,29 @@
 <script>
 
 	var currentDate = new Date();
-	var data = [{
-			values: d3.range(100).map(function(d, i){
+	var data = [
+		{
+			values: d3.range(100).map(function(d, i) {
 				return {
 					x: currentDate.getTime() + 1000 * i,
-					y: Math.random()*100,
-					y2: Math.random()*100
+					y: Math.random() * 100,
+					y2: Math.random() * 100
 				};
 			}),
 			"color": "skyblue",
 			"name": "line A"
 		},
-		{values: d3.range(100).map(function(d, i){
-				return {
-					x: currentDate.getTime() + 1000 * i,
-					y: Math.random()*100,
-					y2: Math.random()*100
-				};
-			}),
+		{values: d3.range(100).map(function(d, i) {
+			return {
+				x: currentDate.getTime() + 1000 * i,
+				y: Math.random() * 100,
+				y2: Math.random() * 100
+			};
+		}),
 			"color": "orange",
 			"name": "line B"
-		}];
+		}
+	];
 
 	var firesprayChart1 = firespray.chart()
 		.setConfig({
@@ -66,7 +68,7 @@
 			width: 600,
 			height: 400,
 			theme: 'default',
-        	geometryType: 'line',
+			geometryType: 'line',
 			progressiveRenderingRate: 5
 		})
 		.setData(data);

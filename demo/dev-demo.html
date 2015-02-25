@@ -17,13 +17,14 @@
 	<script src="../src/containers.js"></script>
 	<script src="../src/geometries.js"></script>
 	<style>
-		.container{
+		.container {
 			float: left;
 			height: 400px;
 			padding: 10px;
 			width: 600px;
 		}
-		.hovered-geometry, .hover-guide-x{ stroke: #555; }
+
+		.hovered-geometry, .hover-guide-x { stroke: #555; }
 	</style>
 </head>
 <body>
@@ -35,17 +36,17 @@
 
 	var data = firespray.dataUtils.generateData({pointCount: 50, lineCount: 100});
 
-//	var data = [
-//		{
-//			name: 'a',
-//			color: 'skyblue',
-//			values: [
-//				{x: 1414291072000, y: 10},
-//				{x: 1414291073000, y: 1},
-//				{x: 1414291074000, y: 4}
-//			]
-//		}
-//	];
+	//	var data = [
+	//		{
+	//			name: 'a',
+	//			color: 'skyblue',
+	//			values: [
+	//				{x: 1414291072000, y: 10},
+	//				{x: 1414291073000, y: 1},
+	//				{x: 1414291074000, y: 4}
+	//			]
+	//		}
+	//	];
 
 	var chart = firespray.chart()
 		.setConfig({
@@ -53,33 +54,33 @@
 			width: 800,
 			height: 200,
 			theme: 'default',
-//			useBrush: true,
+			//			useBrush: true,
 			progressiveRenderingRate: 1,
 			renderer: 'SVG',
-//        	geometryType: 'stackedArea'
-        	geometryType: 'stackedLine'
-//        	geometryType: 'stackedBar'
-//        	geometryType: 'bar'
-//        	geometryType: 'percentBar'
-//        	geometryType: 'line'
+			//        	geometryType: 'stackedArea'
+			geometryType: 'stackedLine'
+			//        	geometryType: 'stackedBar'
+			//        	geometryType: 'bar'
+			//        	geometryType: 'percentBar'
+			//        	geometryType: 'line'
 		})
-		.on('chartHover', function(a, b){
+		.on('chartHover', function(a, b) {
 			var dateX = a[0].closestValue.x;
 			chart2.setHovering(dateX);
 		})
 		.setData(data);
 
 	var chart2 = firespray.chart()
-			.setConfig({
-				container: document.querySelector('.chart2'),
-				width: 600,
-				height: 400,
-				theme: 'default',
-//			useBrush: true,
-				geometryType: 'stackedBar'
-//				geometryType: 'bar'
-			})
-			.setData(data);
+		.setConfig({
+			container: document.querySelector('.chart2'),
+			width: 600,
+			height: 400,
+			theme: 'default',
+			//			useBrush: true,
+			geometryType: 'stackedBar'
+			//				geometryType: 'bar'
+		})
+		.setData(data);
 
 </script>
 </body>

@@ -30,6 +30,7 @@
 	.firespray-chart .panel-bg { fill: #333; }
 	.firespray-chart .axis-y line { stroke: #444; }
 	text { font-size: 10px; fill: #aaa; }
+
 </script>
 
 <script type="style" id="style2">
@@ -45,6 +46,7 @@
 	.axes .axis-x line { stroke: #eee; }
 	.bg .axis-x line { stroke: #eee; }
 	#chart { padding: 10px; }
+
 </script>
 
 <select id="styles">
@@ -65,16 +67,16 @@
 			height: 400,
 			showGridX: true,
 			showTicksX: true,
-        	geometryType: 'line',
+			geometryType: 'line',
 			tickFormatX: '%M:%S'
 		}).setData(data);
 
 	var style = document.head.querySelector('style');
-	function setStyle(selector){
+	function setStyle(selector) {
 		style.innerHTML = document.querySelector('#' + selector).innerText;
 	}
 
-	document.querySelector('#styles').onchange = function(e){
+	document.querySelector('#styles').onchange = function(e) {
 		setStyle(e.target.value);
 	};
 

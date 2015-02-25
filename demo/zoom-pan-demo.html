@@ -35,24 +35,24 @@
 	 -zoom from mouse instead of center
 	 */
 
-	var data = firespray.dataUtils.generateData( {pointCount: 200, lineCount: 5} );
+	var data = firespray.dataUtils.generateData({pointCount: 200, lineCount: 5});
 
 	var chart = firespray.chart()
-		.setConfig( {
-			container: document.querySelector( '.chart1' ),
+		.setConfig({
+			container: document.querySelector('.chart1'),
 			width: 600,
 			height: 400,
 			theme: 'default',
 			stripeWidthInSample: 1,
 			geometryType: 'line'
-		} )
-		.setData( data )
-		.on( 'mouseDragMove', function( newExtentX ) {
-			chart.setZoom( newExtentX );
-		} )
-		.on( 'mouseWheelScroll', function( newExtentX ) {
-			chart.setZoom( newExtentX );
-		} );
+		})
+		.setData(data)
+		.on('mouseDragMove', function(newExtentX) {
+			chart.setZoom(newExtentX);
+		})
+		.on('mouseWheelScroll', function(newExtentX) {
+			chart.setZoom(newExtentX);
+		});
 
 </script>
 </body>

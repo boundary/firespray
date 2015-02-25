@@ -18,7 +18,7 @@
 	<script src="../src/containers.js"></script>
 	<script src="../src/geometries.js"></script>
 	<style>
-		.container{
+		.container {
 			float: left;
 			height: 250px;
 			padding: 10px;
@@ -31,156 +31,155 @@
 
 <script>
 
-var testDatasets = {
-	simpleData : [
-		{
-			name: 'a',
-			color: 'skyblue',
-			values: [
-				{x: 1414291072000, y: 10},
-				{x: 1414291073000, y: 1},
-				{x: 1414291074000, y: 5}
-			]
+	var testDatasets = {
+		simpleData: [
+			{
+				name: 'a',
+				color: 'skyblue',
+				values: [
+					{x: 1414291072000, y: 10},
+					{x: 1414291073000, y: 1},
+					{x: 1414291074000, y: 5}
+				]
+			}
+		],
+
+		stackedData: [
+			{
+				name: 'a',
+				color: 'skyblue',
+				values: [
+					{x: 1414291072000, y: 10},
+					{x: 1414291073000, y: 1},
+					{x: 1414291074000, y: 5}
+				]
+			},
+			{
+				name: 'b',
+				color: 'orange',
+				values: [
+					{x: 1414291072000, y: 5},
+					{x: 1414291073000, y: 1},
+					{x: 1414291074000, y: 15}
+				]
+			}
+		],
+
+		mirrorData: [
+			{
+				name: 'a',
+				color: 'skyblue',
+				values: [
+					{x: 1414291072000, y: 10, y2: 15},
+					{x: 1414291073000, y: 1, y2: 1},
+					{x: 1414291074000, y: 5, y2: 2}
+				]
+			}
+		],
+
+		data10Sec: [
+			{
+				name: 'a',
+				color: 'skyblue',
+				values: [
+					{x: 1414291070000, y: 10},
+					{x: 1414291080000, y: 1},
+					{x: 1414291090000, y: 5},
+					{x: 1414291100000, y: 1},
+					{x: 1414291110000, y: 1}
+				]
+			}
+		],
+
+		dataUnequal: [
+			{
+				name: 'a',
+				color: 'skyblue',
+				values: [
+					{x: 1414291071000, y: 10},
+					{x: 1414291072000, y: 1},
+					{x: 1414291074000, y: 5},
+					{x: 1414291078000, y: 1},
+					{x: 1414291079000, y: 1}
+				]
+			}
+		],
+
+		subsecondData: [
+			{
+				name: 'a',
+				color: 'skyblue',
+				values: [
+					{x: 1414291072333, y: 10},
+					{x: 1414291073333, y: 1},
+					{x: 1414291074333, y: 5}
+				]
+			}
+		],
+
+		dataDays: [
+			{
+				name: 'a',
+				color: 'skyblue',
+				values: [
+					{x: 1414291071000, y: 10},
+					{x: 1414291071000 + 86400000, y: 1},
+					{x: 1414291071000 + 86400000 * 2, y: 1},
+					{x: 1414291071000 + 86400000 * 3, y: 1},
+					{x: 1414291071000 + 86400000 * 4, y: 1}
+				]
+			}
+		],
+
+		dataLong: [
+			{
+				name: 'a',
+				color: 'skyblue',
+				values: d3.range(100).map(function(d, i) { return {x: 1414291071000 + 1000 * i, y: 10 * (i % 2) + 10}; })
+			}
+		],
+
+		numericalXData: [
+			{
+				name: 'a',
+				color: 'skyblue',
+				values: d3.range(100).map(function(d, i) { return {x: i * 100, y: Math.random() * 100}; })
+			},
+			{
+				name: 'b',
+				color: 'orange',
+				values: d3.range(100).map(function(d, i) { return {x: i * 100, y: Math.random() * 100}; })
+			}
+		]
+	};
+
+	var commonConfig = {
+		width: 400,
+		height: 250,
+		geometryType: 'line',
+		theme: 'default'
+	};
+
+	var specificConfig = {
+		numericalXData: {
+			scaleX: 'linear',
+			tickFormatX: 's'
 		}
-	],
+	};
 
-	stackedData : [
-		{
-			name: 'a',
-			color: 'skyblue',
-			values: [
-				{x: 1414291072000, y: 10},
-				{x: 1414291073000, y: 1},
-				{x: 1414291074000, y: 5}
-			]
-		},
-		{
-			name: 'b',
-			color: 'orange',
-			values: [
-				{x: 1414291072000, y: 5},
-				{x: 1414291073000, y: 1},
-				{x: 1414291074000, y: 15}
-			]
+	var chart;
+	for (var dataset in testDatasets) {
+		chart = firespray.chart()
+			.setConfig({
+				container: d3.select('body').append('div').classed('container', true).node()
+			})
+			.setConfig(commonConfig);
+
+		if (specificConfig[dataset]) {
+			chart.setConfig(specificConfig[dataset]);
 		}
-	],
-
-	mirrorData : [
-		{
-			name: 'a',
-			color: 'skyblue',
-			values: [
-				{x: 1414291072000, y: 10, y2: 15},
-				{x: 1414291073000, y: 1, y2: 1},
-				{x: 1414291074000, y: 5, y2: 2}
-			]
-		}
-	],
-
-	data10Sec : [
-		{
-			name: 'a',
-			color: 'skyblue',
-			values: [
-				{x: 1414291070000, y: 10},
-				{x: 1414291080000, y: 1},
-				{x: 1414291090000, y: 5},
-				{x: 1414291100000, y: 1},
-				{x: 1414291110000, y: 1}
-			]
-		}
-	],
-
-	dataUnequal : [
-		{
-			name: 'a',
-			color: 'skyblue',
-			values: [
-				{x: 1414291071000, y: 10},
-				{x: 1414291072000, y: 1},
-				{x: 1414291074000, y: 5},
-				{x: 1414291078000, y: 1},
-				{x: 1414291079000, y: 1}
-			]
-		}
-	],
-
-	subsecondData : [
-		{
-			name: 'a',
-			color: 'skyblue',
-			values: [
-				{x: 1414291072333, y: 10},
-				{x: 1414291073333, y: 1},
-				{x: 1414291074333, y: 5}
-			]
-		}
-	],
-
-	dataDays : [
-		{
-			name: 'a',
-			color: 'skyblue',
-			values: [
-				{x: 1414291071000, y: 10},
-				{x: 1414291071000 + 86400000, y: 1},
-				{x: 1414291071000 + 86400000*2, y: 1},
-				{x: 1414291071000 + 86400000*3, y: 1},
-				{x: 1414291071000 + 86400000*4, y: 1}
-			]
-		}
-	],
-
-	dataLong : [
-		{
-			name: 'a',
-			color: 'skyblue',
-			values: d3.range(100).map(function(d, i){ return {x: 1414291071000 + 1000*i, y: 10 * (i%2) + 10}; })
-		}
-	],
-
-	numericalXData : [
-		{
-			name: 'a',
-			color: 'skyblue',
-			values: d3.range(100).map(function(d, i){ return {x: i*100, y: Math.random()*100}; })
-		},
-		{
-			name: 'b',
-			color: 'orange',
-			values: d3.range(100).map(function(d, i){ return {x: i*100, y: Math.random()*100}; })
-		}
-	]
-};
-
-
-var commonConfig = {
-	width: 400,
-	height: 250,
-	geometryType: 'line',
-	theme: 'default'
-};
-
-var specificConfig = {
-	numericalXData: {
-		scaleX: 'linear',
-		tickFormatX: 's'
+		chart.setData(testDatasets[dataset]);
 	}
-};
-
-var chart;
-for(var dataset in testDatasets){
-	chart = firespray.chart()
-		.setConfig({
-			container: d3.select('body').append('div').classed('container', true).node()
-		})
-		.setConfig(commonConfig);
-
-	if(specificConfig[dataset]){
-		chart.setConfig(specificConfig[dataset]);
-	}
-	chart.setData(testDatasets[dataset]);
-}
 
 </script>
 </body>

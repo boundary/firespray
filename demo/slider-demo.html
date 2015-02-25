@@ -20,23 +20,27 @@
 	<script src="../src/containers.js"></script>
 	<script src="../src/geometries.js"></script>
 	<style>
-		.container{
+		.container {
 			float: left;
 			padding: 10px;
 		}
-		.chart1{
+
+		.chart1 {
 			height: 100px;
 			width: 1000px;
 		}
-		.chart2{
+
+		.chart2 {
 			height: 300px;
 			width: 1000px;
 		}
-		.chart3{
+
+		.chart3 {
 			height: 300px;
 			width: 1000px;
 		}
-		text{
+
+		text {
 			font-size: 10px;
 		}
 	</style>
@@ -61,7 +65,7 @@
 			showAxisY: false,
 			useBrush: true
 		})
-		.on('brushChange', function(brushExtent){
+		.on('brushChange', function(brushExtent) {
 			chart1.setData(timeSelectorChart.getDataUnderBrush());
 			chart2.setData(timeSelectorChart.getDataUnderBrush());
 		})
