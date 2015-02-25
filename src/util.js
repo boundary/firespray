@@ -134,7 +134,7 @@ fy.graphicUtils = {
 	},
 
 	sampleWidthInPx: function(cache) {
-		return cache.scaleX(cache.data[0].values[2].x) - cache.scaleX(cache.data[0].values[1].x);
+		return cache.scaleX(cache.data[0].values[1].x) - cache.scaleX(cache.data[0].values[0].x);
 	},
 
 	getZoomExtent: function(cache, config) {

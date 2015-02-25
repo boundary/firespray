@@ -307,7 +307,7 @@ fy.graphicUtils = {
         }
     },
     sampleWidthInPx: function(cache) {
-        return cache.scaleX(cache.data[0].values[2].x) - cache.scaleX(cache.data[0].values[1].x);
+        return cache.scaleX(cache.data[0].values[1].x) - cache.scaleX(cache.data[0].values[0].x);
     },
     getZoomExtent: function(cache, config) {
         return config.zoomedExtentX || fy.dataUtils.computeExtent(cache, "x");
@@ -535,11 +535,11 @@ fy._hovering = {
     }
 };
 
-fy.template = "<div>" + '<svg xmlns="http://www.w3.org/2000/svg" class="bg">' + '<g class="chart-group">' + '<g class="background"><rect class="panel-bg" /></g>' + '<g class="axis-y axis-y2"></g><g class="axis-y axis-y1"></g><rect class="axis-x-bg" /><g class="axis-x"></g>' + "</g>" + "</svg>" + '<canvas class="geometry"></canvas>' + '<svg xmlns="http://www.w3.org/2000/svg" class="geometry-svg"></svg>' + '<svg xmlns="http://www.w3.org/2000/svg" class="axes">' + '<g class="chart-group">' + '<g class="axis-x"></g><rect class="axis-y-bg" /><g class="axis-y axis-y2"></g><g class="axis-y axis-y1"></g>' + "</g>" + "</svg>" + '<svg xmlns="http://www.w3.org/2000/svg" class="interaction">' + '<g class="hover-group"><line class="hover-guide-x"/>' + '<rect class="hover-rect" width="100%" height="100%" pointer-events="all" fill="none"/></rect>' + '</g><g class="brush-group"></g>' + "</svg>" + "</div>";
+firespray.template = "<div>" + '<svg xmlns="http://www.w3.org/2000/svg" class="bg">' + '<g class="chart-group">' + '<g class="background"><rect class="panel-bg" /></g>' + '<g class="axis-y axis-y2"></g><g class="axis-y axis-y1"></g><rect class="axis-x-bg" /><g class="axis-x"></g>' + "</g>" + "</svg>" + '<canvas class="geometry"></canvas>' + '<svg xmlns="http://www.w3.org/2000/svg" class="geometry-svg"></svg>' + '<svg xmlns="http://www.w3.org/2000/svg" class="axes">' + '<g class="chart-group">' + '<g class="axis-x"></g><rect class="axis-y-bg" /><g class="axis-y axis-y2"></g><g class="axis-y axis-y1"></g>' + "</g>" + "</svg>" + '<svg xmlns="http://www.w3.org/2000/svg" class="interaction">' + '<g class="hover-group"><line class="hover-guide-x"/>' + '<rect class="hover-rect" width="100%" height="100%" pointer-events="all" fill="none"/></rect>' + '</g><g class="brush-group"></g>' + "</svg>" + "</div>";
 
-fy.themes = {
-    "default": ".fy-chart .axis-x-bg {fill: white; }" + ".fy-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}" + ".fy-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".fy-chart .stripe { fill: none; }" + ".fy-chart .stripe.even { fill: rgb(250, 250, 250); }" + ".fy-chart .panel-bg { fill: white; }" + ".fy-chart .axis-y line { stroke: #eee; }" + ".fy-chart  text { font-size: 10px; fill: #aaa; }" + ".fy-chart  .hovered-geometry, .hover-guide-x{ stroke: #555; }" + ".fy-chart  .domain{ display: none}",
-    dark: ".fy-chart .axis-x-bg {fill: #222; }" + ".fy-chart .axis-y-bg {fill: rgba(50, 50, 50, 0.5);}" + ".fy-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".fy-chart .stripe { fill: none; }" + ".fy-chart .stripe.even { fill: #222; }" + ".fy-chart .panel-bg { fill: #111; }" + ".fy-chart .axis-y line { stroke: #111; }" + ".fy-chart  text { font-size: 10px; fill: #aaa; }" + ".fy-chart  .hovered-geometry, .hover-guide-x{ stroke: #555; }" + ".fy-chart  .domain{ display: none}"
+firespray.themes = {
+    "default": ".firespray-chart .axis-x-bg {fill: white; }" + ".firespray-chart .axis-y-bg {fill: rgba(220, 220, 220, 0.5);}" + ".firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".firespray-chart .stripe { fill: none; }" + ".firespray-chart .stripe.even { fill: rgb(250, 250, 250); }" + ".firespray-chart .panel-bg { fill: white; }" + ".firespray-chart .axis-y line { stroke: #eee; }" + ".firespray-chart  text { font-size: 10px; fill: #aaa; }" + ".firespray-chart  .hovered-geometry, .hover-guide-x{ stroke: #555; }" + ".firespray-chart  .domain{ display: none}",
+    dark: ".firespray-chart .axis-x-bg {fill: #222; }" + ".firespray-chart .axis-y-bg {fill: rgba(50, 50, 50, 0.5);}" + ".firespray-chart .extent {fill: rgba(200, 200, 200, .5); stroke: rgba(255, 255, 255, .5); }" + ".firespray-chart .stripe { fill: none; }" + ".firespray-chart .stripe.even { fill: #222; }" + ".firespray-chart .panel-bg { fill: #111; }" + ".firespray-chart .axis-y line { stroke: #111; }" + ".firespray-chart  text { font-size: 10px; fill: #aaa; }" + ".firespray-chart  .hovered-geometry, .hover-guide-x{ stroke: #555; }" + ".firespray-chart  .domain{ display: none}"
 };
 
 fy.setupScales = function(config, cache) {
@@ -787,24 +787,23 @@ fy.setupContainers = function(config, cache) {
     if (!config.container) {
         throw "A container is needed";
     }
-    if (cache.root) {
-        return cache;
+    if (!cache.root) {
+        var container = d3.select(config.container).append("div");
+        container.html(fy.template);
+        cache.root = container.style({
+            position: "absolute"
+        }).classed("chart firespray-chart", true);
+        cache.bgSvg = cache.root.select("svg.bg");
+        cache.axesSvg = cache.root.select("svg.axes");
+        cache.interactionSvg = cache.root.select("svg.interaction").attr({
+            id: Math.random()
+        });
+        cache.geometryCanvas = cache.root.select("canvas.geometry");
+        cache.geometrySVG = cache.root.select("svg.geometry-svg");
+        cache.root.selectAll("svg, canvas").style({
+            position: "absolute"
+        });
     }
-    var container = d3.select(config.container).append("div");
-    container.html(fy.template);
-    cache.root = container.style({
-        position: "absolute"
-    }).classed("chart fy-chart", true);
-    cache.bgSvg = cache.root.select("svg.bg");
-    cache.axesSvg = cache.root.select("svg.axes");
-    cache.interactionSvg = cache.root.select("svg.interaction").attr({
-        id: Math.random()
-    });
-    cache.geometryCanvas = cache.root.select("canvas.geometry");
-    cache.geometrySVG = cache.root.select("svg.geometry-svg");
-    cache.root.selectAll("svg, canvas").style({
-        position: "absolute"
-    });
     var scales = {
         time: d3.time.scale(),
         linear: d3.scale.linear()

@@ -6,22 +6,22 @@ fy.setupContainers = function(config, cache) {
 		throw 'A container is needed';
 	}
 
-	if (cache.root) {
-		return cache;
+	if (!cache.root) {
+
+		// Template
+		var container = d3.select(config.container).append('div');
+
+		container.html(fy.template);
+
+		cache.root = container.style({position: 'absolute'}).classed('chart firespray-chart', true);
+		cache.bgSvg = cache.root.select('svg.bg');
+		cache.axesSvg = cache.root.select('svg.axes');
+		cache.interactionSvg = cache.root.select('svg.interaction').attr({id: Math.random()});
+		cache.geometryCanvas = cache.root.select('canvas.geometry');
+		cache.geometrySVG = cache.root.select('svg.geometry-svg');
+		cache.root.selectAll('svg, canvas').style({position: 'absolute'});
+
 	}
-
-	// Template
-	var container = d3.select(config.container).append('div');
-
-	container.html(fy.template);
-
-	cache.root = container.style({position: 'absolute'}).classed('chart fy-chart', true);
-	cache.bgSvg = cache.root.select('svg.bg');
-	cache.axesSvg = cache.root.select('svg.axes');
-	cache.interactionSvg = cache.root.select('svg.interaction').attr({id: Math.random()});
-	cache.geometryCanvas = cache.root.select('canvas.geometry');
-	cache.geometrySVG = cache.root.select('svg.geometry-svg');
-	cache.root.selectAll('svg, canvas').style({position: 'absolute'});
 
 	// scale
 	var scales = {time: d3.time.scale(), linear: d3.scale.linear()};

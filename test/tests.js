@@ -20,9 +20,9 @@ describe('Firespray', function() {
 		}
 	];
 
-	function addChart(_config, _data){
+	function addChart(_config, _data) {
 		container = d3.select('#fixture').style({height: '300px'});
-		var data = _data || firespray.utils.generateData(10, 2);
+		var data = _data || firespray.dataUtils.generateData(10, 2);
 		var config = _config || {};
 		config.container = container.node();
 		chart = firespray.chart()
@@ -30,22 +30,15 @@ describe('Firespray', function() {
 			.setData(data);
 	}
 
-	function removeChart(){
+	function removeChart() {
 		container.style({height: null}).html('');
 	}
-
-	before(function() {
-
-	});
-
-	after(function() {
-
-	});
 
 	describe('Chart rendering', function() {
 
 		it('works with minimal requirements', function() {
 			var container = document.querySelector('#fixture');
+
 			var chart = firespray.chart()
 				.setConfig({container: container})
 				.setData(minimalData);
@@ -100,7 +93,7 @@ describe('Firespray', function() {
 	describe('Data', function() {
 
 		it('generates some data for testing', function() {
-			var dummyData = firespray.utils.generateData({pointCount: 10, lineCount: 2});
+			var dummyData = firespray.dataUtils.generateData({pointCount: 10, lineCount: 2});
 
 			var lineCount = dummyData.length;
 			var pointCount = dummyData[0].values.length;
@@ -123,7 +116,7 @@ describe('Firespray', function() {
 
 		it('binds to mouse move', function(done) {
 			addChart(null, minimalData);
-			chart.on('chartHover', function(d){
+			chart.on('chartHover', function(d) {
 
 				var firstLineData = d[0];
 				expect(firstLineData.name).to.equal('Data 1');
