@@ -88,7 +88,7 @@ fy.chart = function module() {
 		},
 
 		getDataInView: function() {
-			return fy.dataUtils.getDataSlice(cache, exports.getZoomExtent());
+			return fy.dataUtils.getDataSlice(cache, fy.graphicUtils.getZoomExtent(cache, config));
 		},
 
 		setZoom: function(_newExtent) {
@@ -174,9 +174,7 @@ fy.chart = function module() {
 
 		resizeToContainerSize: function() {
 			if (config.container) {
-				exports.setConfig({width: config.container.clientWidth, height: config.container.clientHeight}).refresh();
-				fy.utils.override({width: config.container.clientWidth, height: config.container.clientHeight});
-				this.refresh();
+				fy.utils.override({width: config.container.clientWidth, height: config.container.clientHeight}).refresh();
 			}
 			return this;
 		}
