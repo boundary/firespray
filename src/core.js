@@ -35,8 +35,8 @@ fy.chart = function module() {
 
 	var pipeline = fy.utils.pipeline(
 		fy.setupContainers,
-		fy.setupBrush,
 		fy.setupScales,
+		fy.setupBrush,
 		fy.setupAxisY,
 		fy.setupAxisX,
 		fy.setupHovering,
@@ -174,7 +174,9 @@ fy.chart = function module() {
 
 		resizeToContainerSize: function() {
 			if (config.container) {
-				fy.utils.override({width: config.container.clientWidth, height: config.container.clientHeight}).refresh();
+				fy.utils.override({width: config.container.clientWidth, height: config.container.clientHeight}, config);
+
+				this.refresh();
 			}
 			return this;
 		}

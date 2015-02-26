@@ -2,6 +2,11 @@
 ///////////////////////////////////////////////////////////
 fy.setupBrush = function(config, cache) {
 
+	if(cache.brush){
+		cache.brush.x(cache.scaleX).extent(cache.brushExtent);
+		cache.interactionSvg.select(".brush-group").call(cache.brush).call(cache.brush.event);
+	}
+
 	if (!config.useBrush || cache.brush) {
 		return cache;
 	}
