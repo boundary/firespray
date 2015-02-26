@@ -28,7 +28,7 @@ fy.chart = function module() {
         biggestY: null
     };
     cache.dispatch = d3.dispatch("brushChange", "brushDragStart", "brushDragMove", "brushDragEnd", "geometryHover", "geometryOut", "geometryClick", "chartHover", "chartOut", "chartEnter", "mouseDragMove", "mouseWheelScroll");
-    var pipeline = fy.utils.pipeline(fy.setupContainers, fy.setupBrush, fy.setupScales, fy.setupAxisY, fy.setupAxisX, fy.setupHovering, fy.setupStripes, fy.setupGeometries);
+    var pipeline = fy.utils.pipeline(fy.setupContainers, fy.setupScales, fy.setupBrush, fy.setupAxisY, fy.setupAxisX, fy.setupHovering, fy.setupStripes, fy.setupGeometries);
     var exports = {
         render: function() {
             pipeline(config, cache);
@@ -138,7 +138,8 @@ fy.chart = function module() {
                 fy.utils.override({
                     width: config.container.clientWidth,
                     height: config.container.clientHeight
-                }).refresh();
+                }, config);
+                this.refresh();
             }
             return this;
         }
@@ -744,6 +745,10 @@ fy.setupStripes = function(config, cache) {
 };
 
 fy.setupBrush = function(config, cache) {
+    if (cache.brush) {
+        cache.brush.x(cache.scaleX).extent(cache.brushExtent);
+        cache.interactionSvg.select(".brush-group").call(cache.brush).call(cache.brush.event);
+    }
     if (!config.useBrush || cache.brush) {
         return cache;
     }
