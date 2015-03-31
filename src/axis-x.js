@@ -15,6 +15,10 @@ fy.setupAxisX = function(config, cache) {
 	// labels
 	var textH = 12;
 	if (config.showLabelsX) {
+        var ticksX = [].concat(config.suggestedXTicks);
+        if (ticksX[0]) {
+            axisX.ticks.apply(null, ticksX);
+        }
 		var format = (config.scaleX === 'linear') ? d3.format(config.tickFormatX) : d3.time.format(config.tickFormatX);
 		axisX.tickFormat(format);
 
