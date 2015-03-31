@@ -796,7 +796,7 @@ fy.setupContainers = function(config, cache) {
         container.html(fy.template);
         cache.root = container.style({
             position: "absolute"
-        }).classed("chart firespray-chart", true);
+        }).classed("firespray-chart", true);
         cache.bgSvg = cache.root.select("svg.bg");
         cache.axesSvg = cache.root.select("svg.axes");
         cache.interactionSvg = cache.root.select("svg.interaction").attr({
