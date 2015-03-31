@@ -587,7 +587,7 @@ fy.setupAxisX = function(config, cache) {
     }
     var axisXSelection = cache.axesSvg.select(".axis-x");
     axisXSelection.attr({
-        transform: "translate(" + [ 0, cache.chartH - 2 ] + ")"
+        transform: "translate(" + [ 0, cache.chartH ] + ")"
     });
     var axisX = d3.svg.axis().scale(cache.scaleX).orient("bottom").tickSize(cache.axisXHeight);
     var textH = 12;
@@ -609,7 +609,7 @@ fy.setupAxisX = function(config, cache) {
             axisXSelection.selectAll("line").remove();
         } else {
             axisXSelection.selectAll("line").attr({
-                y2: cache.axisXHeight / 3
+                y2: cache.axisXHeight
             });
         }
         axisXSelection.select(".domain").style({
