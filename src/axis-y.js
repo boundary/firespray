@@ -96,8 +96,9 @@ fy.setupAxisY = function(config, cache) {
 		var labels = cache.axesSvg.selectAll('.axis-y1 text, .axis-y2 text');
 		var maxLabelW = findMaxLabelWidth(labels);
 		var axisYBgW = maxLabelW ? maxLabelW + config.labelYOffset : 0;
+		var axisYBgH = config.axisYBgH ? config.axisYBgH : cache.chartH;
 		var axisYBg = cache.axesSvg.select('.axis-y-bg')
-			.attr({width: axisYBgW, height: cache.chartH});
+			.attr({width: axisYBgW, height: axisYBgH});
 	}
 
 	cache.axesSvg.select('.domain').style({fill: 'none', stroke: 'none'});

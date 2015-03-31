@@ -21,6 +21,7 @@ fy.defaultConfig = {
 	stripeWidthInSample: 1,
 	tickFormatY: null,
 	labelYOffset: 0,
+	axisYBgH: null,
 	axisYStartsAtZero: true,
 	showStripes: true,
 	geometryType: 'line', // bar, percentBar
