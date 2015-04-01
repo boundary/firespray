@@ -9,7 +9,7 @@ fy.setupAxisX = function(config, cache) {
 	// X axis
 	/////////////////////////////
 	var axisXSelection = cache.axesSvg.select('.axis-x');
-	axisXSelection.attr({transform: 'translate(' + [0, cache.chartH - 2] + ')'});
+	axisXSelection.attr({transform: 'translate(' + [0, cache.chartH] + ')'});
 	var axisX = d3.svg.axis().scale(cache.scaleX).orient('bottom').tickSize(cache.axisXHeight);
 
 	// labels
@@ -32,7 +32,7 @@ fy.setupAxisX = function(config, cache) {
 			axisXSelection.selectAll('line').remove();
 		}
 		else {
-			axisXSelection.selectAll('line').attr({y2: cache.axisXHeight / 3});
+			axisXSelection.selectAll('line').attr({y2: cache.axisXHeight});
 		}
 
 		axisXSelection.select('.domain').style({display: 'none'});

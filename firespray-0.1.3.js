@@ -174,6 +174,7 @@ fy.defaultConfig = {
     stripeWidthInSample: 1,
     tickFormatY: null,
     labelYOffset: 0,
+    axisYBgH: null,
     axisYStartsAtZero: true,
     showStripes: true,
     geometryType: "line",
@@ -587,7 +588,7 @@ fy.setupAxisX = function(config, cache) {
     }
     var axisXSelection = cache.axesSvg.select(".axis-x");
     axisXSelection.attr({
-        transform: "translate(" + [ 0, cache.chartH - 2 ] + ")"
+        transform: "translate(" + [ 0, cache.chartH ] + ")"
     });
     var axisX = d3.svg.axis().scale(cache.scaleX).orient("bottom").tickSize(cache.axisXHeight);
     var textH = 12;
@@ -609,7 +610,7 @@ fy.setupAxisX = function(config, cache) {
             axisXSelection.selectAll("line").remove();
         } else {
             axisXSelection.selectAll("line").attr({
-                y2: cache.axisXHeight / 3
+                y2: cache.axisXHeight
             });
         }
         axisXSelection.select(".domain").style({
@@ -710,9 +711,10 @@ fy.setupAxisY = function(config, cache) {
         var labels = cache.axesSvg.selectAll(".axis-y1 text, .axis-y2 text");
         var maxLabelW = findMaxLabelWidth(labels);
         var axisYBgW = maxLabelW ? maxLabelW + config.labelYOffset : 0;
+        var axisYBgH = config.axisYBgH ? config.axisYBgH : cache.chartH;
         var axisYBg = cache.axesSvg.select(".axis-y-bg").attr({
             width: axisYBgW,
-            height: cache.chartH
+            height: axisYBgH
         });
     }
     cache.axesSvg.select(".domain").style({
@@ -796,7 +798,7 @@ fy.setupContainers = function(config, cache) {
         container.html(fy.template);
         cache.root = container.style({
             position: "absolute"
-        }).classed("chart firespray-chart", true);
+        }).classed("firespray-chart", true);
         cache.bgSvg = cache.root.select("svg.bg");
         cache.axesSvg = cache.root.select("svg.axes");
         cache.interactionSvg = cache.root.select("svg.interaction").attr({
