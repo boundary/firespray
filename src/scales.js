@@ -31,7 +31,6 @@ fy.setupScales = function(config, cache) {
 			cache.scaleY.range([cache.chartH, 0]);
 		}
 
-		var scaleYCopy = cache.scaleY.copy();
 		if (config.geometryType === 'stackedLine' ||
 			config.geometryType === 'stackedArea' ||
 			config.geometryType === 'stackedBar') {
@@ -45,7 +44,7 @@ fy.setupScales = function(config, cache) {
 				});
 			var stackedMaxValueSum = d3.max(stackedMaxValues);
 			cache.extentY = [0, stackedMaxValueSum];
-			scaleYCopy.domain(cache.extentY);
+			cache.scaleY.domain(cache.extentY);
 		}
 		else {
 			cache.extentY = config.axisYStartsAtZero ? [0, extentY[1]] : extentY;

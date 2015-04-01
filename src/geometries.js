@@ -76,8 +76,7 @@ fy._computeGeometryData = function(config, cache) {
 	}
 
 	var stackedMaxValue = d3.max(stackedMaxValues);
-	var scaleYCopy = cache.scaleY.copy(); //TODO ?
-	scaleYCopy.domain([config.axisYStartsAtZero ? 0 : scaleYCopy.domain()[0], stackedMaxValue]);
+	var scaleYCopy = cache.scaleY.copy();
 
 	// bar width
 	var barW = cache.scaleX(cache.data[0].values[1].x);
